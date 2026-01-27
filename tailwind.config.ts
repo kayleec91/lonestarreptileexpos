@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
-        serif: ['Source Serif 4', 'serif'],
+        display: ['Bebas Neue', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,18 +61,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        forest: {
-          DEFAULT: "hsl(var(--forest))",
-          light: "hsl(var(--forest-light))",
+        brand: {
+          red: "hsl(var(--brand-red))",
+          blue: "hsl(var(--brand-blue))",
+          black: "hsl(var(--brand-black))",
+          white: "hsl(var(--brand-white))",
         },
-        sand: {
-          DEFAULT: "hsl(var(--sand))",
-          dark: "hsl(var(--sand-dark))",
-        },
-        cream: "hsl(var(--cream))",
-        charcoal: "hsl(var(--charcoal))",
-        terracotta: "hsl(var(--terracotta))",
-        sage: "hsl(var(--sage))",
       },
       borderRadius: {
         lg: "var(--radius)",
