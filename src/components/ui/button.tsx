@@ -9,15 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-forest-light shadow-md hover:shadow-lg hover:-translate-y-0.5",
+        default: "bg-primary text-primary-foreground hover:brightness-110 shadow-md hover:shadow-lg hover:-translate-y-0.5",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-sand-dark shadow-sm hover:shadow-md",
+        secondary: "bg-secondary text-secondary-foreground hover:brightness-110 shadow-sm hover:shadow-md",
         ghost: "hover:bg-muted hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        hero: "bg-accent text-accent-foreground hover:brightness-110 shadow-lg hover:shadow-xl hover:-translate-y-1 text-base",
-        heroOutline: "border-2 border-accent-foreground/80 bg-transparent text-accent-foreground hover:bg-accent-foreground/10 text-base",
-        ticket: "bg-terracotta text-cream hover:brightness-110 shadow-lg hover:shadow-xl hover:-translate-y-0.5",
+        hero: "bg-brand-red text-white hover:brightness-110 shadow-lg hover:shadow-xl hover:-translate-y-1 text-base font-bold",
+        heroOutline: "border-2 border-white/80 bg-transparent text-white hover:bg-white/10 text-base font-bold",
+        ticket: "bg-brand-red text-white hover:brightness-110 shadow-lg hover:shadow-xl hover:-translate-y-0.5 font-bold",
       },
       size: {
         default: "h-11 px-5 py-2",

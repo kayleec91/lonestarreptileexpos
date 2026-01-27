@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.jpeg";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -34,40 +35,41 @@ export function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "bg-background/95 backdrop-blur-md shadow-md py-3"
-          : "bg-transparent py-5"
+          ? "bg-background/95 backdrop-blur-md shadow-md py-2"
+          : "bg-brand-black/90 backdrop-blur-sm py-4"
       )}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
-              isScrolled ? "bg-primary" : "bg-primary/90"
-            )}>
-              <span className="text-primary-foreground font-bold text-lg">LS</span>
-            </div>
+          <Link to="/" className="flex items-center gap-3 group">
+            <img 
+              src={logo} 
+              alt="Lone Star Reptile Expos" 
+              className="h-12 w-12 object-contain rounded-lg"
+            />
             <span className={cn(
-              "font-bold text-xl transition-colors hidden sm:block",
-              isScrolled ? "text-foreground" : "text-primary-foreground"
+              "font-display text-xl tracking-wider transition-colors hidden sm:block",
+              isScrolled ? "text-foreground" : "text-white"
             )}>
-              Lone Star Reptile Expos
+              LONE STAR REPTILE EXPOS
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  "font-medium transition-colors relative",
-                  isScrolled ? "text-foreground hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground",
+                  "font-medium transition-colors relative py-1",
+                  isScrolled 
+                    ? "text-foreground hover:text-primary" 
+                    : "text-white/90 hover:text-white",
                   location.pathname === link.path && "font-semibold",
-                  location.pathname === link.path && !isScrolled && "after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-0.5 after:bg-primary-foreground",
-                  location.pathname === link.path && isScrolled && "text-primary after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-0.5 after:bg-primary"
+                  location.pathname === link.path && !isScrolled && "text-white after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-brand-red",
+                  location.pathname === link.path && isScrolled && "text-primary after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary"
                 )}
               >
                 {link.name}
@@ -86,7 +88,7 @@ export function Navbar() {
             onClick={() => setIsOpen(!isOpen)}
             className={cn(
               "lg:hidden p-2 rounded-lg transition-colors",
-              isScrolled ? "text-foreground hover:bg-muted" : "text-primary-foreground hover:bg-primary-foreground/10"
+              isScrolled ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/10"
             )}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
