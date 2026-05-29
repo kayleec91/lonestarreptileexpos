@@ -1,13 +1,22 @@
+import { useEffect, useState } from "react";
+import { Calendar } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { EventCard } from "@/components/EventCard";
-import { getUpcomingEvents } from "@/lib/data";
+import { Event } from "@/lib/data";
+import { loadEvents } from "@/lib/googleSheets";
 
 export default function Events() {
-  const events = getUpcomingEvents();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadEvents()
+      .then(setEvents)
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <Layout>
-      {/* Hero */}
       <section className="pt-32 pb-16 bg-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl animate-fade-up">
@@ -21,26 +30,23 @@ export default function Events() {
         </div>
       </section>
 
-      {/* Events List */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            {events.map((event, index) => (
-              <div
-                key={event.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <EventCard event={event} />
-              </div>
-            ))}
-          </div>
-
-          {events.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">
-                No upcoming events at this time. Check back soon!
-              </p>
+          {isLoading ? (
+            <div className="text-center py-16 text-muted-foreground">Loading events...</div>
+          ) : events.length > 0 ? (
+            <div className="grid lg:grid-cols-2 gap-6">
+              {events.map((event, index) => (
+                <div key={event.id} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
+                  <EventCard event={event} featured={index === 0 || event.featured} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card rounded-2xl p-10 text-center shadow-card">
+              <Calendar className="w-14 h-14 mx-auto text-primary mb-4" />
+              <h2 className="text-2xl font-bold text-foreground mb-2">No upcoming events listed yet</h2>
+              <p className="text-muted-foreground">New show dates will appear here once they are added to the website sheet.</p>
             </div>
           )}
         </div>

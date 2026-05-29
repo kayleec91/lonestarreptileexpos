@@ -1,42 +1,36 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Ticket, Store, Users, Award, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { EventCard } from "@/components/EventCard";
-import { getUpcomingEvents } from "@/lib/data";
+import { Event } from "@/lib/data";
+import { loadEvents } from "@/lib/googleSheets";
 import logo from "@/assets/logo.jpeg";
 
 const Index = () => {
-  const upcomingEvents = getUpcomingEvents().slice(0, 3);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+
+  useEffect(() => {
+    loadEvents().then((events) => setUpcomingEvents(events.slice(0, 3)));
+  }, []);
 
   return (
     <Layout>
       {/* Hero Section */}
       <section className="relative min-h-[90vh] bg-brand-black flex items-center overflow-hidden">
-        {/* Texas outline background */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10">
-          <img 
-            src={logo} 
-            alt="" 
-            className="w-[600px] h-[600px] object-contain"
-            aria-hidden="true"
-          />
+          <img src={logo} alt="" className="w-[600px] h-[600px] object-contain" aria-hidden="true" />
         </div>
 
         <div className="container mx-auto px-4 py-32 relative z-10">
           <div className="max-w-4xl mx-auto text-center animate-fade-up">
-            <img 
-              src={logo} 
-              alt="Lone Star Reptile Expos" 
-              className="w-48 h-48 mx-auto mb-8 object-contain"
-            />
+            <img src={logo} alt="Lone Star Reptile Expos" className="w-48 h-48 mx-auto mb-8 object-contain" />
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl text-white mb-6 tracking-wide">
-              TEXAS' PREMIER{" "}
-              <span className="text-brand-red">REPTILE</span> &{" "}
-              <span className="text-brand-blue">EXOTIC</span> ANIMAL EXPOS
+              TEXAS' PREMIER <span className="text-brand-red">REPTILE</span> & <span className="text-brand-blue">EXOTIC</span> ANIMAL EXPOS
             </h1>
             <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-              Join thousands of reptile enthusiasts, breeders, and families at our expos across Texas. 
+              Join thousands of reptile enthusiasts, breeders, and families at our expos across Texas.
               Discover rare morphs, quality supplies, and connect with the community.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -57,7 +51,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Bottom Wave */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0 120L60 110C120 100 240 80 360 75C480 70 600 80 720 85C840 90 960 90 1080 85C1200 80 1320 70 1380 65L1440 60V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(var(--background))" />
@@ -75,11 +68,7 @@ const Index = () => {
               { icon: Award, value: "5+", label: "Cities in Texas" },
               { icon: Heart, value: "100%", label: "Family Friendly" },
             ].map((stat, index) => (
-              <div
-                key={index}
-                className="text-center animate-fade-up"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+              <div key={index} className="text-center animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 text-primary mb-4">
                   <stat.icon className="w-7 h-7" />
                 </div>
@@ -103,17 +92,19 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            {upcomingEvents.map((event, index) => (
-              <div
-                key={event.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <EventCard event={event} featured={index === 0} />
-              </div>
-            ))}
-          </div>
+          {upcomingEvents.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+              {upcomingEvents.map((event, index) => (
+                <div key={event.id} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
+                  <EventCard event={event} featured={index === 0 || event.featured} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card rounded-2xl p-8 text-center shadow-card mb-10">
+              <p className="text-muted-foreground">Upcoming shows are being updated. Check back soon.</p>
+            </div>
+          )}
 
           <div className="text-center">
             <Button variant="outline" size="lg" asChild>
