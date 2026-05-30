@@ -65,7 +65,7 @@ const Index = () => {
             {[
               { icon: Users, value: "10,000+", label: "Annual Visitors" },
               { icon: Store, value: "100+", label: "Vendors" },
-              { icon: Award, value: "5+", label: "Cities in Texas" },
+              { icon: Award, value: "5", label: "Cities in Texas" },
               { icon: Heart, value: "100%", label: "Family Friendly" },
             ].map((stat, index) => (
               <div key={index} className="text-center animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
