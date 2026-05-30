@@ -90,7 +90,16 @@ export default function EventDetail() {
                     <h3 className="font-semibold text-foreground">Venue</h3>
                   </div>
                   <p className="text-muted-foreground">{event.venue}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{event.address}</p>
+                  {event.address && (
+                    <a
+                      href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline mt-1 inline-block"
+                    >
+                      {event.address}
+                    </a>
+                  )}
                 </div>
 
                 <div className="bg-card rounded-xl p-6 shadow-card">
@@ -102,21 +111,8 @@ export default function EventDetail() {
                   </div>
                   <div className="text-muted-foreground space-y-1">
                     <p>Adults: ${event.admission.adult}</p>
-                    <p>Children: ${event.admission.child}</p>
+                    <p>Children (7-12): ${event.admission.child}</p>
                     <p>Kids 6 and under: {event.admission.under5}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card rounded-xl overflow-hidden shadow-card">
-                <div className="aspect-video bg-muted flex items-center justify-center">
-                  <div className="text-center text-muted-foreground p-8">
-                    <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">{event.venue}</p>
-                    <p className="text-sm">{event.address}</p>
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline mt-2 inline-block">
-                      Open in Google Maps →
-                    </a>
                   </div>
                 </div>
               </div>
@@ -140,7 +136,7 @@ export default function EventDetail() {
                   <h3 className="text-xl font-bold mb-4">Get Your Tickets</h3>
                   <div className="space-y-2 mb-6 text-primary-foreground/90">
                     <p>Adults: ${event.admission.adult}</p>
-                    <p>Children: ${event.admission.child}</p>
+                    <p>Children (7-12): ${event.admission.child}</p>
                     <p>Kids 6 and under: {event.admission.under5}</p>
                   </div>
                   <Button variant="hero" size="lg" className="w-full" asChild>
@@ -153,7 +149,7 @@ export default function EventDetail() {
 
                 <div className="bg-card rounded-2xl p-6 shadow-card space-y-3">
                   <Button variant="outline" size="lg" className="w-full" asChild>
-                    <a href={event.vendorListLink || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                    <a href="#vendors" className="flex items-center justify-center gap-2">
                       <ExternalLink className="w-5 h-5" />
                       View Vendor List
                     </a>
@@ -171,7 +167,7 @@ export default function EventDetail() {
         </div>
       </section>
 
-      <section className="py-16 bg-muted/50">
+      <section id="vendors" className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <h2 className="text-2xl font-bold text-foreground">Vendors at This Event</h2>

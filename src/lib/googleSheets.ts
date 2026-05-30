@@ -23,20 +23,22 @@ function asString(value: unknown) {
 }
 
 function asNumber(value: unknown, fallback: number) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
+  const raw = asString(value).replace(/[^0-9.]/g, "");
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && raw !== "" ? parsed : fallback;
 }
 
 function normalizeEvent(row: Record<string, unknown>): Event {
-  const id = asString(row.id) || asString(row.eventId) || asString(row.slug);
-  const name = asString(row.name) || asString(row.showName) || `${asString(row.city)} Reptile Expo`;
+  const city = asString(row.city) || asString(row.id) || asString(row.showName);
   const startDate = asString(row.startDate);
   const endDate = asString(row.endDate) || startDate;
+  const id = asString(row.id) || asString(row.eventId) || createEventId(city, startDate);
+  const name = asString(row.name) || asString(row.showName) || `${city} Reptile Expo`;
 
   return {
     id,
     name,
-    city: asString(row.city),
+    city,
     state: asString(row.state) || "TX",
     dates: asString(row.dates) || formatDisplayDate(startDate, endDate),
     startDate,
@@ -51,27 +53,35 @@ function normalizeEvent(row: Record<string, unknown>): Event {
     },
     ticketLink: asString(row.ticketLink),
     vendorListLink: asString(row.vendorListLink),
-    registerLink: asString(row.registerLink) || `/vendor-registration?event=${id}`,
+    registerLink: asString(row.registerLink) || `/vendor-registration?event=${encodeURIComponent(id)}`,
     mapEmbed: asString(row.mapEmbed),
     status: asString(row.status).toLowerCase() === "inactive" ? "inactive" : "active",
-    featured: ["yes", "true", "1"].includes(asString(row.featured).toLowerCase()),
-    faqs: getDefaultFaqs(`${asString(row.city)} ${asString(row.venue)}`),
+    featured: ["yes", "true", "1", "featured"].includes(asString(row.featured).toLowerCase()),
+    faqs: getDefaultFaqs(`${city} ${asString(row.venue)}`),
   };
 }
 
 function normalizeVendor(row: Record<string, unknown>): Vendor {
+  const eventIds = asString(row.eventIds || row.eventId || row.event)
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
   return {
-    id: asString(row.id) || asString(row.vendorId) || crypto.randomUUID(),
+    id: asString(row.id) || asString(row.vendorId) || asString(row.name) || crypto.randomUUID(),
     name: asString(row.name) || asString(row.businessName),
     category: (asString(row.category) || "Other") as VendorCategory,
-    description: asString(row.description) || asString(row.animalsProducts) || "Vendor details coming soon.",
-    eventIds: asString(row.eventIds)
-      .split(",")
-      .map((id) => id.trim())
-      .filter(Boolean),
-    website: asString(row.website),
-    instagram: asString(row.instagram),
+    description: asString(row.description) || asString(row.animalsProducts),
+    eventIds,
+    website: normalizeUrl(asString(row.website)),
+    instagram: normalizeUrl(asString(row.instagram)),
   };
+}
+
+function normalizeUrl(url: string) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
 }
 
 async function getJson(action: string, params: Record<string, string> = {}) {
@@ -95,7 +105,7 @@ export async function loadEvents(): Promise<Event[]> {
 
     const sheetEvents = rawEvents
       .map((event) => normalizeEvent(event))
-      .filter((event) => event.id && event.name && event.startDate && event.endDate)
+      .filter((event) => event.id && event.name && event.city && event.startDate && event.endDate)
       .filter((event) => isUpcomingEvent(event))
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
@@ -148,7 +158,21 @@ export function getFallbackVendors(eventId?: string) {
   return eventId ? fallbackVendors.filter((vendor) => vendor.eventIds.includes(eventId)) : fallbackVendors;
 }
 
-function formatDisplayDate(startDate: string, endDate: string) {
+function createEventId(city: string, startDate: string) {
+  const citySlug = city.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "event";
+  return startDate ? `${citySlug}-${startDate}` : citySlug;
+}
+
+function ordinal(day: number) {
+  if (day >= 11 && day <= 13) return `${day}th`;
+  const last = day % 10;
+  if (last === 1) return `${day}st`;
+  if (last === 2) return `${day}nd`;
+  if (last === 3) return `${day}rd`;
+  return `${day}th`;
+}
+
+export function formatDisplayDate(startDate: string, endDate: string) {
   if (!startDate) return "";
 
   const start = new Date(`${startDate}T12:00:00`);
@@ -156,13 +180,17 @@ function formatDisplayDate(startDate: string, endDate: string) {
 
   const startMonth = start.toLocaleString("en-US", { month: "long" });
   const endMonth = end.toLocaleString("en-US", { month: "long" });
-  const startDay = start.getDate();
-  const endDay = end.getDate();
+  const startDay = ordinal(start.getDate());
+  const endDay = ordinal(end.getDate());
   const year = end.getFullYear();
 
-  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) {
-    return `${startMonth} ${startDay}–${endDay}, ${year}`;
+  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth() && start.getDate() === end.getDate()) {
+    return `${startMonth} ${startDay}, ${year}`;
   }
 
-  return `${startMonth} ${startDay}–${endMonth} ${endDay}, ${year}`;
+  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) {
+    return `${startMonth} ${startDay} & ${endDay}, ${year}`;
+  }
+
+  return `${startMonth} ${startDay} & ${endMonth} ${endDay}, ${year}`;
 }

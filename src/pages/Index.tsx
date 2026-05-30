@@ -12,7 +12,7 @@ const Index = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
 
   useEffect(() => {
-    loadEvents().then((events) => setUpcomingEvents(events.slice(0, 3)));
+    loadEvents().then((events) => setUpcomingEvents(events.slice(0, 4)));
   }, []);
 
   return (
@@ -93,10 +93,10 @@ const Index = () => {
           </div>
 
           {upcomingEvents.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               {upcomingEvents.map((event, index) => (
                 <div key={event.id} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
-                  <EventCard event={event} featured={index === 0 || event.featured} showVendorRegistration={false} />
+                  <EventCard event={event} featured={false} showVendorRegistration={true} />
                 </div>
               ))}
             </div>

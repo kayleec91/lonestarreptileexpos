@@ -36,9 +36,7 @@ export function EventCard({ event, featured = false, showVendorRegistration = tr
       </div>
 
       <div className="p-6">
-        <h3 className={cn("font-bold text-foreground mb-4", featured ? "text-2xl" : "text-xl")}>
-          {event.name}
-        </h3>
+        <h3 className={cn("font-bold text-foreground mb-4", featured ? "text-2xl" : "text-xl")}>{event.name}</h3>
 
         <div className="space-y-3 mb-6">
           <div className="flex items-center gap-3 text-muted-foreground">
@@ -59,16 +57,16 @@ export function EventCard({ event, featured = false, showVendorRegistration = tr
             </a>
           </Button>
           <Button variant="outline" className="w-full" asChild>
-            <Link to={`/events/${event.id}`}>
+            <Link to={`/events/${encodeURIComponent(event.id)}`}>
               <Users className="w-4 h-4" />
               Event Details
             </Link>
           </Button>
           <Button variant="outline" className="w-full" asChild>
-            <a href={event.vendorListLink || `/events/${event.id}`} target={event.vendorListLink ? "_blank" : undefined} rel="noopener noreferrer">
+            <Link to={`/events/${encodeURIComponent(event.id)}#vendors`}>
               <Users className="w-4 h-4" />
               Vendor List
-            </a>
+            </Link>
           </Button>
           {showVendorRegistration && (
             <Button variant="secondary" className="w-full" asChild>

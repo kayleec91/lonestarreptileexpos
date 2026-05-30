@@ -39,10 +39,27 @@ function getEvents() {
   today.setHours(0, 0, 0, 0);
 
   return rows
+    .map(row => {
+      const startDate = String(row.startDate || "").trim();
+      const endDate = String(row.endDate || startDate).trim();
+      const city = String(row.city || row.id || row.name || "").trim();
+      return {
+        ...row,
+        id: String(row.id || createEventId(city, startDate)).trim(),
+        name: String(row.name || `${city} Reptile Expo`).trim(),
+        city,
+        state: String(row.state || "TX").trim(),
+        startDate,
+        endDate,
+        dates: String(row.dates || formatDisplayDate(startDate, endDate)).trim(),
+        status: String(row.status || "active").trim(),
+        featured: String(row.featured || "").trim()
+      };
+    })
     .filter(row => String(row.status || "active").toLowerCase() === "active")
+    .filter(row => row.startDate && row.endDate)
     .filter(row => {
-      const endDate = new Date(row.endDate);
-      endDate.setHours(23, 59, 59, 999);
+      const endDate = new Date(`${row.endDate}T23:59:59`);
       return endDate >= today;
     })
     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
@@ -55,7 +72,7 @@ function getVendors(eventId) {
   if (!eventId) return rows;
 
   return rows.filter(row =>
-    String(row.eventIds || "")
+    String(row.eventIds || row.eventId || row.event || "")
       .split(",")
       .map(item => item.trim())
       .includes(eventId)
@@ -106,6 +123,45 @@ function getRows(sheet) {
     });
     return item;
   });
+}
+
+function createEventId(city, startDate) {
+  const citySlug = String(city || "event")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return startDate ? `${citySlug}-${startDate}` : citySlug;
+}
+
+function ordinal(day) {
+  if (day >= 11 && day <= 13) return `${day}th`;
+  const last = day % 10;
+  if (last === 1) return `${day}st`;
+  if (last === 2) return `${day}nd`;
+  if (last === 3) return `${day}rd`;
+  return `${day}th`;
+}
+
+function formatDisplayDate(startDate, endDate) {
+  if (!startDate) return "";
+
+  const start = new Date(`${startDate}T12:00:00`);
+  const end = new Date(`${endDate || startDate}T12:00:00`);
+  const startMonth = Utilities.formatDate(start, Session.getScriptTimeZone(), "MMMM");
+  const endMonth = Utilities.formatDate(end, Session.getScriptTimeZone(), "MMMM");
+  const startDay = ordinal(start.getDate());
+  const endDay = ordinal(end.getDate());
+  const year = Utilities.formatDate(end, Session.getScriptTimeZone(), "yyyy");
+
+  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth() && start.getDate() === end.getDate()) {
+    return `${startMonth} ${startDay}, ${year}`;
+  }
+
+  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) {
+    return `${startMonth} ${startDay} & ${endDay}, ${year}`;
+  }
+
+  return `${startMonth} ${startDay} & ${endMonth} ${endDay}, ${year}`;
 }
 
 function jsonResponse(data) {

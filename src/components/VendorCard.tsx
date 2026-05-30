@@ -27,7 +27,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
       <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-3 ${categoryColors[vendor.category] || "bg-muted text-muted-foreground"}`}>
         {vendor.category}
       </span>
-      <p className="text-muted-foreground text-sm mb-4">{vendor.description}</p>
+      {vendor.description && <p className="text-muted-foreground text-sm mb-4">{vendor.description}</p>}
       {(vendor.website || vendor.instagram) && (
         <div className="flex flex-wrap gap-3 text-sm">
           {vendor.website && (
