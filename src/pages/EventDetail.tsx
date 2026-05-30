@@ -103,7 +103,7 @@ export default function EventDetail() {
                   <div className="text-muted-foreground space-y-1">
                     <p>Adults: ${event.admission.adult}</p>
                     <p>Children: ${event.admission.child}</p>
-                    <p>Under 5: {event.admission.under5}</p>
+                    <p>Kids 6 and under: {event.admission.under5}</p>
                   </div>
                 </div>
               </div>
@@ -141,7 +141,7 @@ export default function EventDetail() {
                   <div className="space-y-2 mb-6 text-primary-foreground/90">
                     <p>Adults: ${event.admission.adult}</p>
                     <p>Children: ${event.admission.child}</p>
-                    <p>Under 5: {event.admission.under5}</p>
+                    <p>Kids 6 and under: {event.admission.under5}</p>
                   </div>
                   <Button variant="hero" size="lg" className="w-full" asChild>
                     <a href={event.ticketLink || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">

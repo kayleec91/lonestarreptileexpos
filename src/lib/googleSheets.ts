@@ -1,4 +1,4 @@
-import { events as fallbackEvents, vendors as fallbackVendors, Event, Vendor, VendorCategory, isUpcomingEvent } from "@/lib/data";
+import { events as fallbackEvents, vendors as fallbackVendors, Event, Vendor, VendorCategory, isUpcomingEvent, getDefaultFaqs } from "@/lib/data";
 
 const GOOGLE_SCRIPT_URL = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL?.trim() || "";
 
@@ -8,6 +8,9 @@ export interface VendorApplication {
   email: string;
   phone: string;
   selectedEvent: string;
+  selectedEventName?: string;
+  selectedEventDates?: string;
+  selectedEventVenue?: string;
   tableType: string;
   category: string;
   animalsProducts: string;
@@ -44,7 +47,7 @@ function normalizeEvent(row: Record<string, unknown>): Event {
     admission: {
       adult: asNumber(row.adultAdmission ?? row.adult, 10),
       child: asNumber(row.childAdmission ?? row.child, 5),
-      under5: asString(row.under5Admission ?? row.under5) || "Free",
+      under5: asString(row.kids6UnderAdmission ?? row.under5Admission ?? row.under5) || "Free",
     },
     ticketLink: asString(row.ticketLink),
     vendorListLink: asString(row.vendorListLink),
@@ -52,7 +55,7 @@ function normalizeEvent(row: Record<string, unknown>): Event {
     mapEmbed: asString(row.mapEmbed),
     status: asString(row.status).toLowerCase() === "inactive" ? "inactive" : "active",
     featured: ["yes", "true", "1"].includes(asString(row.featured).toLowerCase()),
-    faqs: fallbackEvents[0]?.faqs || [],
+    faqs: getDefaultFaqs(`${asString(row.city)} ${asString(row.venue)}`),
   };
 }
 

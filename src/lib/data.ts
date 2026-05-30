@@ -45,12 +45,17 @@ export type VendorCategory =
   | "Education"
   | "Other";
 
-const defaultFaqs = [
-  { question: "Is parking available?", answer: "Yes, parking is available on-site or nearby. Check each venue for details." },
-  { question: "Are children allowed?", answer: "Yes. Lone Star Reptile Expos are family-friendly events." },
-  { question: "Can I bring my own reptile?", answer: "No outside animals are allowed unless approved by event staff." },
-  { question: "Do vendors accept cards?", answer: "Many vendors accept cards, but bringing cash is recommended." },
-];
+export function getDefaultFaqs(cityOrVenue = "") {
+  const location = cityOrVenue.toLowerCase();
+  const hasAtm = location.includes("north richland") || location.includes("nrh") || location.includes("amarillo");
+
+  return [
+    { question: "Is parking available?", answer: "Yes, parking is available on-site or nearby. Check each venue for details." },
+    { question: "Are children allowed?", answer: "Yes. Lone Star Reptile Expos are family-friendly events, and kids 6 and under are free." },
+    { question: "Is there an ATM?", answer: hasAtm ? "Yes, an ATM is available at this location." : "Not at this location. We recommend bringing cash because some vendors may not accept cards." },
+    { question: "Do vendors accept cards?", answer: "Many vendors accept cards, but bringing cash is recommended." },
+  ];
+}
 
 export const events: Event[] = [
   {
@@ -70,7 +75,7 @@ export const events: Event[] = [
     registerLink: "/vendor-registration?event=nrh-may-2026",
     status: "active",
     featured: true,
-    faqs: defaultFaqs,
+    faqs: getDefaultFaqs("North Richland Hills"),
   },
   {
     id: "arlington-jul-2026",
@@ -88,7 +93,7 @@ export const events: Event[] = [
     vendorListLink: "https://www.lonestarreptileexpos.com/vendors",
     registerLink: "/vendor-registration?event=arlington-jul-2026",
     status: "active",
-    faqs: defaultFaqs,
+    faqs: getDefaultFaqs("Arlington"),
   },
   {
     id: "coleman-jul-2026",
@@ -106,7 +111,7 @@ export const events: Event[] = [
     vendorListLink: "http://lonestarreptileexpos.com/colemanvendors",
     registerLink: "/vendor-registration?event=coleman-jul-2026",
     status: "active",
-    faqs: defaultFaqs,
+    faqs: getDefaultFaqs("Coleman"),
   },
   {
     id: "amarillo-oct-2026",
@@ -124,7 +129,7 @@ export const events: Event[] = [
     vendorListLink: "https://www.lonestarreptileexpos.com/vendors-amarillo",
     registerLink: "/vendor-registration?event=amarillo-oct-2026",
     status: "active",
-    faqs: defaultFaqs,
+    faqs: getDefaultFaqs("Amarillo"),
   },
   {
     id: "san-antonio-oct-2026",
@@ -142,7 +147,7 @@ export const events: Event[] = [
     vendorListLink: "https://www.lonestarreptileexpos.com/sanantoniovendors",
     registerLink: "/vendor-registration?event=san-antonio-oct-2026",
     status: "active",
-    faqs: defaultFaqs,
+    faqs: getDefaultFaqs("Schertz"),
   },
   {
     id: "nrh-nov-2026",
@@ -160,7 +165,7 @@ export const events: Event[] = [
     vendorListLink: "https://www.lonestarreptileexpos.com/nrhvendors",
     registerLink: "/vendor-registration?event=nrh-nov-2026",
     status: "active",
-    faqs: defaultFaqs,
+    faqs: getDefaultFaqs("North Richland Hills"),
   },
 ];
 

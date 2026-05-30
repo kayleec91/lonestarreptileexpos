@@ -28,7 +28,7 @@ address
 hours
 adultAdmission
 childAdmission
-under5Admission
+kids6UnderAdmission
 ticketLink
 vendorListLink
 registerLink
@@ -40,6 +40,7 @@ Important:
 Use dates like 2027-07-10 in startDate and endDate.
 Use active or inactive in status.
 Use yes in featured if you want that show emphasized.
+Kids 6 and under are free. Put Free in kids6UnderAdmission.
 Each location can have its own ticketLink.
 Each location can have its own vendorListLink.
 registerLink can be blank. The site will use the built-in registration form.
@@ -69,7 +70,10 @@ Business Name
 Contact Name
 Email
 Phone
-Show
+Show ID
+Show Name
+Show Dates
+Show Venue
 Table Type
 Category
 Animals Products
@@ -109,3 +113,29 @@ For Vercel or Netlify, add this as an environment variable in the project settin
 VITE_GOOGLE_APPS_SCRIPT_URL
 
 Then redeploy the site.
+
+
+## Vendor table pricing currently built into the form
+
+Arlington and Amarillo:
+1 8ft table = $125
+2 8ft tables = $225
+3 8ft tables = $275
+4 8ft tables = $325
+Additional 8ft tables = $50 each
+
+Schertz:
+1 6ft table = $115
+2 6ft tables = $215
+3 6ft tables = $265
+4 6ft tables = $315
+Additional 6ft tables = $50 each
+
+North Richland Hills:
+1 8ft table = $150
+2 8ft tables = $250
+3 8ft tables = $325
+4 8ft tables = $375
+Additional 8ft tables = $50 each
+
+Important: the vendor form now submits Show ID, Show Name, Show Dates, and Show Venue so multiple Arlington shows can be separated clearly.

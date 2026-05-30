@@ -37,7 +37,7 @@ export default function About() {
               About Us
             </h1>
             <p className="text-xl text-primary-foreground/80 font-serif">
-              Connecting Texas reptile enthusiasts since 2020.
+              Serving the Texas reptile community since 2007.
             </p>
           </div>
         </div>
@@ -57,8 +57,7 @@ export default function About() {
                   in Texas where quality, education, and community come first.
                 </p>
                 <p>
-                  What started as a single show in Houston has grown into a series of expos across 
-                  major Texas cities, attracting thousands of visitors and hundreds of vendors each year.
+                  Since 2007, Lone Star Reptile Expos has served the Texas reptile community with shows that bring together families, keepers, breeders, and vendors across the state.
                 </p>
                 <p>
                   We're passionate about connecting people with ethical breeders, quality supplies, 
@@ -71,7 +70,7 @@ export default function About() {
               <div className="aspect-[4/3] rounded-3xl bg-hero flex items-center justify-center overflow-hidden">
                 <div className="text-center text-primary-foreground p-8">
                   <Star className="w-16 h-16 mx-auto mb-4 opacity-80" />
-                  <h3 className="text-2xl font-bold">Since 2020</h3>
+                  <h3 className="text-2xl font-bold">Since 2007</h3>
                   <p className="text-primary-foreground/80">Serving Texas Reptile Community</p>
                 </div>
               </div>

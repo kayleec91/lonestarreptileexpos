@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Clock, Ticket, Users, Store } from "lucide-react";
+import { Calendar, MapPin, Ticket, Users, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Event } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 interface EventCardProps {
   event: Event;
   featured?: boolean;
+  showVendorRegistration?: boolean;
 }
 
-export function EventCard({ event, featured = false }: EventCardProps) {
+export function EventCard({ event, featured = false, showVendorRegistration = true }: EventCardProps) {
   return (
     <div
       className={cn(
@@ -48,10 +49,6 @@ export function EventCard({ event, featured = false }: EventCardProps) {
             <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
             <span>{event.venue}</span>
           </div>
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <Clock className="w-5 h-5 text-primary flex-shrink-0" />
-            <span>{event.hours}</span>
-          </div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
@@ -73,12 +70,14 @@ export function EventCard({ event, featured = false }: EventCardProps) {
               Vendor List
             </a>
           </Button>
-          <Button variant="secondary" className="w-full" asChild>
-            <Link to={`/vendor-registration?event=${encodeURIComponent(event.id)}`}>
-              <Store className="w-4 h-4" />
-              Register Now
-            </Link>
-          </Button>
+          {showVendorRegistration && (
+            <Button variant="secondary" className="w-full" asChild>
+              <Link to={`/vendor-registration?event=${encodeURIComponent(event.id)}`}>
+                <Store className="w-4 h-4" />
+                Vendor Registration
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>
