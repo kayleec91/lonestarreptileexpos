@@ -1,6 +1,15 @@
 const SHEET_EVENTS = "Events";
+const SHEET_LOCATIONS = "Locations";
+const SHEET_ADD_EXPO = "Add Expo";
 const SHEET_VENDORS = "Vendors";
 const SHEET_VENDOR_SUBMISSIONS = "Vendor Submissions";
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("Website Tools")
+    .addItem("Add Expo to Events", "addExpoFromForm")
+    .addToUi();
+}
 
 function doGet(e) {
   const action = e.parameter.action || "events";
@@ -42,21 +51,21 @@ function getEvents() {
     .map(row => {
       const startDate = String(row.startDate || "").trim();
       const endDate = String(row.endDate || startDate).trim();
-      const city = String(row.city || row.id || row.name || "").trim();
+      const city = String(row.city || row.locationId || row.name || "").trim();
+      const locationId = String(row.locationId || city).trim();
+
       return {
         ...row,
-        id: String(row.id || createEventId(city, startDate)).trim(),
+        id: createEventId(locationId, startDate),
+        locationId,
         name: String(row.name || `${city} Reptile Expo`).trim(),
         city,
         state: String(row.state || "TX").trim(),
         startDate,
         endDate,
-        dates: String(row.dates || formatDisplayDate(startDate, endDate)).trim(),
-        status: String(row.status || "active").trim(),
-        featured: String(row.featured || "").trim()
+        dates: formatDisplayDate(startDate, endDate)
       };
     })
-    .filter(row => String(row.status || "active").toLowerCase() === "active")
     .filter(row => row.startDate && row.endDate)
     .filter(row => {
       const endDate = new Date(`${row.endDate}T23:59:59`);
@@ -65,18 +74,72 @@ function getEvents() {
     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 }
 
-function getVendors(eventId) {
+function getVendors(locationId) {
   const sheet = getSheet(SHEET_VENDORS);
   const rows = getRows(sheet);
 
-  if (!eventId) return rows;
+  if (!locationId) return rows;
 
   return rows.filter(row =>
     String(row.eventIds || row.eventId || row.event || "")
       .split(",")
-      .map(item => item.trim())
-      .includes(eventId)
+      .map(item => item.trim().toLowerCase())
+      .includes(String(locationId).trim().toLowerCase())
   );
+}
+
+function addExpoFromForm() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const formSheet = getSheet(SHEET_ADD_EXPO);
+  const locationsSheet = getSheet(SHEET_LOCATIONS);
+  const eventsSheet = getSheet(SHEET_EVENTS);
+
+  const locationId = String(formSheet.getRange("B3").getDisplayValue()).trim();
+  const startDateValue = formSheet.getRange("B4").getValue();
+  const endDateValue = formSheet.getRange("B5").getValue();
+  const ticketLink = String(formSheet.getRange("B6").getDisplayValue()).trim();
+
+  if (!locationId || !startDateValue || !endDateValue) {
+    SpreadsheetApp.getUi().alert("Please select a location and enter both the start date and end date.");
+    return;
+  }
+
+  const locationRows = getRows(locationsSheet);
+  const location = locationRows.find(row =>
+    String(row.locationId || "").trim().toLowerCase() === locationId.toLowerCase()
+  );
+
+  if (!location) {
+    SpreadsheetApp.getUi().alert(`Location not found in the Locations tab: ${locationId}`);
+    return;
+  }
+
+  const timezone = Session.getScriptTimeZone();
+  const startDate = Utilities.formatDate(new Date(startDateValue), timezone, "yyyy-MM-dd");
+  const endDate = Utilities.formatDate(new Date(endDateValue), timezone, "yyyy-MM-dd");
+  const id = createEventId(locationId, startDate);
+
+  const headers = eventsSheet.getRange(1, 1, 1, eventsSheet.getLastColumn()).getValues()[0].map(String);
+  const newEvent = {
+    id,
+    locationId,
+    name: location.name || `${location.city || locationId} Reptile Expo`,
+    city: location.city || locationId,
+    state: location.state || "TX",
+    startDate,
+    endDate,
+    venue: location.venue || "",
+    address: location.address || "",
+    ticketLink
+  };
+
+  const row = headers.map(header => newEvent[header] ?? "");
+  eventsSheet.appendRow(row);
+  eventsSheet.getRange(2, 1, Math.max(eventsSheet.getLastRow() - 1, 1), eventsSheet.getLastColumn())
+    .sort({ column: headers.indexOf("startDate") + 1, ascending: true });
+
+  formSheet.getRange("B3:B6").clearContent();
+  spreadsheet.toast(`${newEvent.city} ${formatDisplayDate(startDate, endDate)} added to Events.`, "Expo Added", 5);
 }
 
 function saveVendorApplication(data) {
@@ -113,24 +176,26 @@ function getRows(sheet) {
 
   const headers = values[0].map(header => String(header).trim());
 
-  return values.slice(1).map(row => {
-    const item = {};
-    headers.forEach((header, index) => {
-      const value = row[index];
-      item[header] = value instanceof Date
-        ? Utilities.formatDate(value, Session.getScriptTimeZone(), "yyyy-MM-dd")
-        : value;
+  return values.slice(1)
+    .filter(row => row.some(value => value !== ""))
+    .map(row => {
+      const item = {};
+      headers.forEach((header, index) => {
+        const value = row[index];
+        item[header] = value instanceof Date
+          ? Utilities.formatDate(value, Session.getScriptTimeZone(), "yyyy-MM-dd")
+          : value;
+      });
+      return item;
     });
-    return item;
-  });
 }
 
-function createEventId(city, startDate) {
-  const citySlug = String(city || "event")
+function createEventId(locationId, startDate) {
+  const locationSlug = String(locationId || "event")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  return startDate ? `${citySlug}-${startDate}` : citySlug;
+  return startDate ? `${locationSlug}-${startDate}` : locationSlug;
 }
 
 function ordinal(day) {

@@ -228,7 +228,7 @@ export default function VendorRegistration() {
                   <select value={form.selectedEvent} onChange={(e) => updateField("selectedEvent", e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                     <option value="">Select a show</option>
                     {events.map((event) => (
-                      <option key={event.id} value={event.id}>{event.city} · {event.dates} · {event.venue}</option>
+                      <option key={`${event.id}-${event.startDate}`} value={event.id}>{event.city} · {event.dates} · {event.venue}</option>
                     ))}
                   </select>
                 </Field>

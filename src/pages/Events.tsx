@@ -37,8 +37,8 @@ export default function Events() {
           ) : events.length > 0 ? (
             <div className="grid lg:grid-cols-2 gap-6">
               {events.map((event, index) => (
-                <div key={event.id} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
-                  <EventCard event={event} featured={index === 0 || event.featured} />
+                <div key={`${event.id}-${event.startDate}`} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
+                  <EventCard event={event} featured={index === 0} />
                 </div>
               ))}
             </div>

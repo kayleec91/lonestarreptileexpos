@@ -40,6 +40,7 @@ function normalizeEvent(row: Record<string, unknown>): Event {
     name,
     city,
     state: asString(row.state) || "TX",
+    locationId: asString(row.locationId) || city,
     dates: asString(row.dates) || formatDisplayDate(startDate, endDate),
     startDate,
     endDate,
@@ -55,8 +56,6 @@ function normalizeEvent(row: Record<string, unknown>): Event {
     vendorListLink: asString(row.vendorListLink),
     registerLink: asString(row.registerLink) || `/vendor-registration?event=${encodeURIComponent(id)}`,
     mapEmbed: asString(row.mapEmbed),
-    status: asString(row.status).toLowerCase() === "inactive" ? "inactive" : "active",
-    featured: ["yes", "true", "1", "featured"].includes(asString(row.featured).toLowerCase()),
     faqs: getDefaultFaqs(`${city} ${asString(row.venue)}`),
   };
 }

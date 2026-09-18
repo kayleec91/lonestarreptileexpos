@@ -19,9 +19,17 @@ export default function EventDetail() {
   useEffect(() => {
     if (!eventId) return;
 
-    Promise.all([loadEvents(), loadVendors(eventId)])
-      .then(([loadedEvents, loadedVendors]) => {
+    loadEvents()
+      .then(async (loadedEvents) => {
         setEvents(loadedEvents);
+        const selectedEvent = loadedEvents.find((item) => item.id === eventId);
+        if (!selectedEvent) {
+          setVendors([]);
+          return;
+        }
+
+        const vendorLocationId = selectedEvent.locationId || selectedEvent.city;
+        const loadedVendors = await loadVendors(vendorLocationId);
         setVendors(loadedVendors);
       })
       .finally(() => setIsLoading(false));
@@ -50,7 +58,7 @@ export default function EventDetail() {
         <div className="pt-32 pb-16 min-h-screen flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Event Not Found</h1>
-            <p className="text-muted-foreground mb-6">This event may be expired, inactive, or removed from the website sheet.</p>
+            <p className="text-muted-foreground mb-6">This event may be expired or removed from the website sheet.</p>
             <Button asChild>
               <Link to="/events">Back to Events</Link>
             </Button>

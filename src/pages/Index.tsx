@@ -17,7 +17,22 @@ const Index = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
 
   useEffect(() => {
-    loadEvents().then((events) => setUpcomingEvents(events.slice(0, 4)));
+    loadEvents().then((events) => {
+      const nextByLocation: Event[] = [];
+      const seenLocations = new Set<string>();
+
+      for (const event of events) {
+        const locationKey = (event.locationId || event.city).trim().toLowerCase();
+        if (!locationKey || seenLocations.has(locationKey)) continue;
+
+        seenLocations.add(locationKey);
+        nextByLocation.push(event);
+
+        if (nextByLocation.length === 6) break;
+      }
+
+      setUpcomingEvents(nextByLocation);
+    });
   }, []);
 
   return (
@@ -133,7 +148,7 @@ const Index = () => {
           </div>
 
           {upcomingEvents.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
               {upcomingEvents.map((event, index) => (
                 <div key={event.id} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
                   <EventCard event={event} featured={false} showVendorRegistration={true} />

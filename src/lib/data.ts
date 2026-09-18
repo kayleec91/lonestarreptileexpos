@@ -3,6 +3,7 @@ export interface Event {
   name: string;
   city: string;
   state: string;
+  locationId?: string;
   dates: string;
   startDate: string;
   endDate: string;
@@ -18,7 +19,7 @@ export interface Event {
   vendorListLink: string;
   registerLink: string;
   mapEmbed?: string;
-  status: "active" | "inactive";
+  status?: "active" | "inactive";
   featured?: boolean;
   faqs: Array<{ question: string; answer: string }>;
 }
