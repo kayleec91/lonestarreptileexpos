@@ -19,7 +19,7 @@ export function Footer() {
               />
             </div>
             <p className="text-white/80 max-w-xs">
-              Texas' premier reptile and exotic animal expos. Connecting enthusiasts, breeders, and families.
+              North Texas' longest-running reptile expo, proudly serving reptile enthusiasts since 2007.
             </p>
           </div>
 
@@ -63,7 +63,7 @@ export function Footer() {
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="https://www.instagram.com/lonestarreptileexpos"
+                href="https://www.instagram.com/lsrexpos"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/10 hover:bg-brand-red flex items-center justify-center transition-colors"

@@ -69,10 +69,10 @@ export function EventCard({ event, featured = false, showVendorRegistration = tr
             </Link>
           </Button>
           {showVendorRegistration && (
-            <Button variant="secondary" className="w-full" asChild>
+            <Button variant="secondary" className="w-full px-3 text-sm" asChild>
               <Link to={`/vendor-registration?event=${encodeURIComponent(event.id)}`}>
                 <Store className="w-4 h-4" />
-                Vendor Registration
+                Vendor Signup
               </Link>
             </Button>
           )}

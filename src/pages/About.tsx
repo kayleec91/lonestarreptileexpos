@@ -2,12 +2,15 @@ import { Heart, BookOpen, Users, Shield, Star } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import chameleonPhoto from "@/assets/gallery/chameleon.webp";
+import beardedDragonPhoto from "@/assets/gallery/bearded-dragon.webp";
+import geckoPhoto from "@/assets/gallery/gecko.webp";
 
 const values = [
   {
     icon: BookOpen,
-    title: "Education First",
-    description: "We believe in promoting responsible reptile keeping through education and expert guidance.",
+    title: "Knowledge First",
+    description: "We believe in promoting responsible reptile keeping through knowledge, experience, and expert guidance.",
   },
   {
     icon: Shield,
@@ -53,25 +56,50 @@ export default function About() {
               </h2>
               <div className="prose prose-lg text-muted-foreground space-y-4">
                 <p>
-                  Lone Star Reptile Expos was born from a simple idea: create the best reptile shows 
-                  in Texas where quality, education, and community come first.
+                  Lone Star Reptile Expos is the longest-running reptile expo in North Texas, proudly serving the reptile community since 2007.
                 </p>
                 <p>
-                  Since 2007, Lone Star Reptile Expos has served the Texas reptile community with shows that bring together families, keepers, breeders, and vendors across the state.
+                  Our shows bring together families, keepers, breeders, collectors, and vendors from across Texas, surrounding states, and throughout the United States.
                 </p>
                 <p>
-                  We're passionate about connecting people with ethical breeders, quality supplies, 
-                  and the knowledge they need to care for these amazing animals. Whether you're a 
-                  first-time reptile owner or a seasoned collector, our expos offer something for everyone.
+                  We are passionate about connecting people with ethical breeders, quality supplies, feeders, and the knowledge they need to care for these amazing animals. Whether you are a first-time reptile owner or a seasoned collector, there is something for everyone at Lone Star Reptile Expos.
                 </p>
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-[4/3] rounded-3xl bg-hero flex items-center justify-center overflow-hidden">
-                <div className="text-center text-primary-foreground p-8">
-                  <Star className="w-16 h-16 mx-auto mb-4 opacity-80" />
-                  <h3 className="text-2xl font-bold">Since 2007</h3>
-                  <p className="text-primary-foreground/80">Serving Texas Reptile Community</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2 overflow-hidden rounded-3xl shadow-card">
+                  <img
+                    src={chameleonPhoto}
+                    alt="Colorful chameleon at a Lone Star Reptile Expo"
+                    className="w-full aspect-[16/9] object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="overflow-hidden rounded-2xl shadow-card">
+                  <img
+                    src={beardedDragonPhoto}
+                    alt="Bearded dragon at a Lone Star Reptile Expo"
+                    className="w-full aspect-square object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="overflow-hidden rounded-2xl shadow-card">
+                  <img
+                    src={geckoPhoto}
+                    alt="Gecko at a Lone Star Reptile Expo"
+                    className="w-full aspect-square object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              <div className="absolute -bottom-4 -left-4 bg-brand-black text-white rounded-2xl px-5 py-4 shadow-hover">
+                <div className="flex items-center gap-3">
+                  <Star className="w-7 h-7 text-brand-red" />
+                  <div>
+                    <p className="font-display text-2xl leading-none">Since 2007</p>
+                    <p className="text-white/70 text-sm mt-1">North Texas' longest-running reptile expo</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -87,7 +115,7 @@ export default function About() {
               Our Values
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Everything we do is guided by our commitment to education, ethics, and community.
+              Everything we do is guided by our commitment to knowledge, ethics, and community.
             </p>
           </div>
 
@@ -117,7 +145,7 @@ export default function About() {
               Our Mission
             </h2>
             <p className="text-xl text-muted-foreground font-serif leading-relaxed mb-8">
-              "To create welcoming, educational, and ethical reptile expos that inspire responsible 
+              "To create welcoming, informative, and ethical reptile expos that inspire responsible 
               ownership, support ethical breeders, and build a thriving community of reptile 
               enthusiasts across Texas."
             </p>
@@ -126,7 +154,7 @@ export default function About() {
                 <Link to="/events">View Our Events</Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link to="/vendor-registration">Join as a Vendor</Link>
+                <Link to="/vendor-registration">Vendor Signup</Link>
               </Button>
             </div>
           </div>

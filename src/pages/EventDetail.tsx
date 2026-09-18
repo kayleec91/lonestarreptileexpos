@@ -183,7 +183,7 @@ export default function EventDetail() {
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              {searchQuery ? "No vendors found matching your search." : "Vendor list coming soon.  "}
+              {searchQuery ? "No vendors found matching your search." : "Vendor list coming soon."}
             </div>
           )}
         </div>
