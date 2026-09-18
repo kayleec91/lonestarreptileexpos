@@ -7,11 +7,6 @@ import { EventCard } from "@/components/EventCard";
 import { Event } from "@/lib/data";
 import { loadEvents } from "@/lib/googleSheets";
 import logo from "@/assets/logo.jpeg";
-import chameleonPhoto from "@/assets/gallery/chameleon.webp";
-import beardedDragonPhoto from "@/assets/gallery/bearded-dragon.webp";
-import geckoPhoto from "@/assets/gallery/gecko.webp";
-import monitorLizardPhoto from "@/assets/gallery/monitor-lizard.webp";
-import armadilloPhoto from "@/assets/gallery/armadillo.webp";
 
 const Index = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
@@ -94,41 +89,6 @@ const Index = () => {
                 </div>
                 <div className="font-display text-4xl text-foreground mb-1">{stat.value}</div>
                 <div className="text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Expo Gallery Section */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="font-display text-4xl lg:text-5xl text-foreground mb-4 tracking-wide">
-              SEE WHAT'S AT THE <span className="text-primary">EXPO</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From colorful reptiles and unique species to feeders, enclosures, and supplies, every show has something new to discover.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-            {[
-              { src: chameleonPhoto, alt: "Colorful chameleon at a Lone Star Reptile Expo" },
-              { src: beardedDragonPhoto, alt: "Bearded dragon at a Lone Star Reptile Expo" },
-              { src: geckoPhoto, alt: "Gecko displayed at a Lone Star Reptile Expo" },
-              { src: monitorLizardPhoto, alt: "Lizard in an enclosure at a Lone Star Reptile Expo" },
-              { src: armadilloPhoto, alt: "Unique animal encounter at a Lone Star Reptile Expo" },
-            ].map((photo, index) => (
-              <div
-                key={photo.alt}
-                className={`overflow-hidden rounded-2xl shadow-card ${index === 4 ? "col-span-2 md:col-span-1" : ""}`}
-              >
-                <img
-                  src={photo.src}
-                  alt={photo.alt}
-                  className="w-full aspect-[4/5] object-cover transition-transform duration-300 hover:scale-105"
-                  loading="lazy"
-                />
               </div>
             ))}
           </div>
