@@ -1,145 +1,54 @@
-import { useParams, Link, useLocation } from "react-router-dom";
-import {
-  Calendar,
-  MapPin,
-  Clock,
-  DollarSign,
-  Ticket,
-  ChevronLeft,
-  Store,
-  ExternalLink,
-} from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+import { Calendar, MapPin, Clock, DollarSign, Ticket, ChevronLeft, Search, Store, ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Event } from "@/lib/data";
-import { loadEvents } from "@/lib/googleSheets";
-
-type SimpleVendor = {
-  name: string;
-  link?: string;
-};
+import { Input } from "@/components/ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { VendorCard } from "@/components/VendorCard";
+import { TicketTailorWidget } from "@/components/TicketTailorWidget";
+import { Event, Vendor } from "@/lib/data";
+import { loadEvents, loadVendors } from "@/lib/googleSheets";
 
 export default function EventDetail() {
   const { eventId } = useParams<{ eventId: string }>();
-  const location = useLocation();
-
   const [events, setEvents] = useState<Event[]>([]);
-  const [vendors, setVendors] = useState<SimpleVendor[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!eventId) return;
 
-    setIsLoading(true);
-
     loadEvents()
       .then(async (loadedEvents) => {
         setEvents(loadedEvents);
-
-        const selectedEvent = loadedEvents.find(
-          (item) => item.id === eventId
-        );
-
+        const selectedEvent = loadedEvents.find((item) => item.id === eventId);
         if (!selectedEvent) {
           setVendors([]);
           return;
         }
 
-        const scriptUrl =
-          import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
-
-        if (!scriptUrl) {
-          console.error(
-            "Missing VITE_GOOGLE_APPS_SCRIPT_URL"
-          );
-          setVendors([]);
-          return;
-        }
-
-        try {
-          const response = await fetch(
-            `${scriptUrl}?action=vendors&eventId=${encodeURIComponent(
-              selectedEvent.id
-            )}`
-          );
-
-          if (!response.ok) {
-            throw new Error(
-              `Vendor request failed: ${response.status}`
-            );
-          }
-
-          const data = await response.json();
-
-          setVendors(
-            Array.isArray(data)
-              ? data
-              : []
-          );
-        } catch (error) {
-          console.error(
-            "Unable to load vendors:",
-            error
-          );
-          setVendors([]);
-        }
+        const vendorLocationId = selectedEvent.locationId || selectedEvent.city;
+        const loadedVendors = await loadVendors(vendorLocationId);
+        setVendors(loadedVendors);
       })
       .finally(() => setIsLoading(false));
   }, [eventId]);
 
-  /*
-   * Always put Event Details at the top.
-   * If the URL ends in #vendors, go directly to the vendor section.
-   * This fixes navigation from the Home event cards.
-   */
-  useEffect(() => {
-    if (isLoading) return;
+  const event = useMemo(() => events.find((item) => item.id === eventId), [events, eventId]);
 
-    const timer = window.setTimeout(() => {
-      if (location.hash === "#vendors") {
-        const vendorSection =
-          document.getElementById("vendors");
-
-        if (vendorSection) {
-          vendorSection.scrollIntoView({
-            behavior: "auto",
-            block: "start",
-          });
-          return;
-        }
-      }
-
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "auto",
-      });
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [eventId, location.hash, isLoading]);
-
-  const event = useMemo(
-    () =>
-      events.find(
-        (item) => item.id === eventId
-      ),
-    [events, eventId]
+  const filteredVendors = vendors.filter(
+    (vendor) =>
+      vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vendor.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vendor.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
     return (
       <Layout>
-        <div className="pt-32 pb-16 min-h-screen flex items-center justify-center text-muted-foreground">
-          Loading event...
-        </div>
+        <div className="pt-32 pb-16 min-h-screen flex items-center justify-center text-muted-foreground">Loading event...</div>
       </Layout>
     );
   }
@@ -149,18 +58,10 @@ export default function EventDetail() {
       <Layout>
         <div className="pt-32 pb-16 min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">
-              Event Not Found
-            </h1>
-
-            <p className="text-muted-foreground mb-6">
-              This event may be expired or removed from the website sheet.
-            </p>
-
+            <h1 className="text-2xl font-bold text-foreground mb-4">Event Not Found</h1>
+            <p className="text-muted-foreground mb-6">This event may be expired or removed from the website sheet.</p>
             <Button asChild>
-              <Link to="/events">
-                Back to Events
-              </Link>
+              <Link to="/events">Back to Events</Link>
             </Button>
           </div>
         </div>
@@ -172,22 +73,13 @@ export default function EventDetail() {
     <Layout>
       <section className="pt-32 pb-16 bg-hero">
         <div className="container mx-auto px-4">
-          <Link
-            to="/events"
-            className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors mb-6"
-          >
+          <Link to="/events" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition-colors mb-6">
             <ChevronLeft className="w-4 h-4" />
             Back to Events
           </Link>
-
           <div className="max-w-2xl animate-fade-up">
-            <h1 className="text-4xl lg:text-5xl font-bold text-primary-foreground mb-2">
-              {event.name}
-            </h1>
-
-            <p className="text-xl text-primary-foreground/80">
-              {event.dates}
-            </p>
+            <h1 className="text-4xl lg:text-5xl font-bold text-primary-foreground mb-2">{event.name}</h1>
+            <p className="text-xl text-primary-foreground/80">{event.dates}</p>
           </div>
         </div>
       </section>
@@ -197,38 +89,19 @@ export default function EventDetail() {
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               <div className="grid sm:grid-cols-2 gap-4">
-                <InfoCard
-                  icon={Calendar}
-                  title="Dates"
-                  text={event.dates}
-                />
-
-                <InfoCard
-                  icon={Clock}
-                  title="Hours"
-                  text={event.hours}
-                />
-
+                <InfoCard icon={Calendar} title="Dates" text={event.dates} />
+                <InfoCard icon={Clock} title="Hours" text={event.hours} />
                 <div className="bg-card rounded-xl p-6 shadow-card">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                       <MapPin className="w-5 h-5 text-primary" />
                     </div>
-
-                    <h3 className="font-semibold text-foreground">
-                      Venue
-                    </h3>
+                    <h3 className="font-semibold text-foreground">Venue</h3>
                   </div>
-
-                  <p className="text-muted-foreground">
-                    {event.venue}
-                  </p>
-
+                  <p className="text-muted-foreground">{event.venue}</p>
                   {event.address && (
                     <a
-                      href={`https://maps.google.com/?q=${encodeURIComponent(
-                        event.address
-                      )}`}
+                      href={`https://maps.google.com/?q=${encodeURIComponent(event.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-primary hover:underline mt-1 inline-block"
@@ -243,53 +116,35 @@ export default function EventDetail() {
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                       <DollarSign className="w-5 h-5 text-primary" />
                     </div>
-
-                    <h3 className="font-semibold text-foreground">
-                      Admission
-                    </h3>
+                    <h3 className="font-semibold text-foreground">Admission</h3>
                   </div>
-
                   <div className="text-muted-foreground space-y-1">
-                    <p>
-                      Adults: ${event.admission.adult}
-                    </p>
-                    <p>
-                      Children (7-12): ${event.admission.child}
-                    </p>
-                    <p>
-                      Kids 6 and under: {event.admission.under5}
-                    </p>
+                    <p>Adults: ${event.admission.adult}</p>
+                    <p>Children (7-12): ${event.admission.child}</p>
+                    <p>Kids 6 and under: {event.admission.under5}</p>
                   </div>
                 </div>
               </div>
 
+              {event.ticketLink && (
+                <div id="tickets" className="bg-card rounded-2xl p-5 sm:p-7 shadow-card scroll-mt-28">
+                  <div className="mb-5">
+                    <h2 className="text-2xl font-bold text-foreground">Select Tickets</h2>
+                    <p className="text-muted-foreground mt-1">Choose your event date and tickets below. Secure checkout is provided by Ticket Tailor.</p>
+                  </div>
+                  <TicketTailorWidget ticketLink={event.ticketLink} />
+                </div>
+              )}
+
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-6">
-                  Frequently Asked Questions
-                </h2>
-
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="space-y-3"
-                >
-                  {event.faqs.map(
-                    (faq, index) => (
-                      <AccordionItem
-                        key={index}
-                        value={`faq-${index}`}
-                        className="bg-card rounded-xl px-6 shadow-card border-none"
-                      >
-                        <AccordionTrigger className="text-left font-semibold hover:no-underline">
-                          {faq.question}
-                        </AccordionTrigger>
-
-                        <AccordionContent className="text-muted-foreground">
-                          {faq.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    )
-                  )}
+                <h2 className="text-2xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="space-y-3">
+                  {event.faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`faq-${index}`} className="bg-card rounded-xl px-6 shadow-card border-none">
+                      <AccordionTrigger className="text-left font-semibold hover:no-underline">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </div>
             </div>
@@ -297,67 +152,29 @@ export default function EventDetail() {
             <div className="lg:col-span-1">
               <div className="sticky top-28 space-y-4">
                 <div className="bg-primary text-primary-foreground rounded-2xl p-6 shadow-card">
-                  <h3 className="text-xl font-bold mb-4">
-                    Get Your Tickets
-                  </h3>
-
+                  <h3 className="text-xl font-bold mb-4">Get Your Tickets</h3>
                   <div className="space-y-2 mb-6 text-primary-foreground/90">
-                    <p>
-                      Adults: ${event.admission.adult}
-                    </p>
-                    <p>
-                      Children (7-12): ${event.admission.child}
-                    </p>
-                    <p>
-                      Kids 6 and under: {event.admission.under5}
-                    </p>
+                    <p>Adults: ${event.admission.adult}</p>
+                    <p>Children (7-12): ${event.admission.child}</p>
+                    <p>Kids 6 and under: {event.admission.under5}</p>
                   </div>
-
-                  <Button
-                    variant="hero"
-                    size="lg"
-                    className="w-full"
-                    asChild
-                  >
-                    <a
-                      href={event.ticketLink || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2"
-                    >
+                  <Button variant="hero" size="lg" className="w-full" asChild>
+                    <a href="#tickets" className="flex items-center justify-center gap-2">
                       <Ticket className="w-5 h-5" />
-                      Buy Tickets Now
+                      Select Tickets
                     </a>
                   </Button>
                 </div>
 
                 <div className="bg-card rounded-2xl p-6 shadow-card space-y-3">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full"
-                    asChild
-                  >
-                    <a
-                      href="#vendors"
-                      className="flex items-center justify-center gap-2"
-                    >
+                  <Button variant="outline" size="lg" className="w-full" asChild>
+                    <a href="#vendors" className="flex items-center justify-center gap-2">
                       <ExternalLink className="w-5 h-5" />
                       View Vendor List
                     </a>
                   </Button>
-
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    asChild
-                  >
-                    <Link
-                      to={`/vendor-registration?event=${encodeURIComponent(
-                        event.id
-                      )}`}
-                      className="flex items-center justify-center gap-2"
-                    >
+                  <Button size="lg" className="w-full" asChild>
+                    <Link to={`/vendor-registration?event=${encodeURIComponent(event.id)}`} className="flex items-center justify-center gap-2">
                       <Store className="w-5 h-5" />
                       Register as Vendor
                     </Link>
@@ -369,43 +186,23 @@ export default function EventDetail() {
         </div>
       </section>
 
-      <section
-        id="vendors"
-        className="scroll-mt-28 py-16 bg-muted/50"
-      >
+      <section id="vendors" className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground">
-              Vendors at This Event
-            </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h2 className="text-2xl font-bold text-foreground">Vendors at This Event</h2>
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Search vendors..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+            </div>
           </div>
 
-          {vendors.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {vendors.map((vendor) =>
-                vendor.link ? (
-                  <a
-                    key={vendor.name}
-                    href={vendor.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-card rounded-xl border border-border p-4 text-center font-semibold text-foreground shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-                  >
-                    {vendor.name}
-                  </a>
-                ) : (
-                  <div
-                    key={vendor.name}
-                    className="bg-card rounded-xl border border-border p-4 text-center font-semibold text-foreground shadow-sm"
-                  >
-                    {vendor.name}
-                  </div>
-                )
-              )}
+          {filteredVendors.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredVendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
-              Vendor list coming soon.
+              {searchQuery ? "No vendors found matching your search." : "Vendor list coming soon."}
             </div>
           )}
         </div>
@@ -414,30 +211,16 @@ export default function EventDetail() {
   );
 }
 
-function InfoCard({
-  icon: Icon,
-  title,
-  text,
-}: {
-  icon: typeof Calendar;
-  title: string;
-  text: string;
-}) {
+function InfoCard({ icon: Icon, title, text }: { icon: typeof Calendar; title: string; text: string }) {
   return (
     <div className="bg-card rounded-xl p-6 shadow-card">
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
           <Icon className="w-5 h-5 text-primary" />
         </div>
-
-        <h3 className="font-semibold text-foreground">
-          {title}
-        </h3>
+        <h3 className="font-semibold text-foreground">{title}</h3>
       </div>
-
-      <p className="text-muted-foreground">
-        {text}
-      </p>
+      <p className="text-muted-foreground">{text}</p>
     </div>
   );
 }
