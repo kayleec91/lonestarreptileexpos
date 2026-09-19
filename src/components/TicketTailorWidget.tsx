@@ -1,8 +1,15 @@
-import { useEffect, useMemo, useRef } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 interface TicketTailorWidgetProps {
   ticketLink: string;
 }
+
+const TICKET_TAILOR_SCRIPT =
+  "https://cdn.tickettailor.com/js/widgets/min/widget.js";
 
 function createWidgetUrl(ticketLink: string) {
   const eventId = ticketLink.match(
@@ -13,22 +20,27 @@ function createWidgetUrl(ticketLink: string) {
     return "";
   }
 
+  const parameters = new URLSearchParams({
+    ref: "website_widget",
+    show_search_filter: "true",
+    show_date_filter: "true",
+    show_sort: "true",
+    show_event_name: "false",
+    show_venue: "false",
+  });
+
   return (
     `https://www.tickettailor.com/events/` +
-    `lonestarreptileexpos/${eventId}/select-date` +
-    `?ref=website_widget` +
-    `&show_search_filter=true` +
-    `&show_date_filter=true` +
-    `&show_sort=true` +
-    `&show_event_name=false` +
-    `&show_venue=false`
+    `lonestarreptileexpos/${eventId}/select-date?` +
+    parameters.toString()
   );
 }
 
 export function TicketTailorWidget({
   ticketLink,
 }: TicketTailorWidgetProps) {
-  const widgetRef = useRef<HTMLDivElement>(null);
+  const containerRef =
+    useRef<HTMLDivElement>(null);
 
   const widgetUrl = useMemo(
     () => createWidgetUrl(ticketLink),
@@ -36,80 +48,80 @@ export function TicketTailorWidget({
   );
 
   useEffect(() => {
-    const container = widgetRef.current;
+    const container = containerRef.current;
 
     if (!container || !widgetUrl) {
       return;
     }
 
-    container.innerHTML = "";
+    const timer = window.setTimeout(() => {
+      container.innerHTML = "";
 
-    const fallback = document.createElement("div");
-    fallback.className = "tt-widget-fallback";
+      const fallback =
+        document.createElement("div");
 
-    const fallbackText =
-      document.createElement("p");
+      fallback.className =
+        "tt-widget-fallback";
 
-    const fallbackLink =
-      document.createElement("a");
+      fallback.innerHTML = `
+        <p>
+          <a
+            href="${widgetUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Click here if ticket checkout does not load
+          </a>
+        </p>
+      `;
 
-    fallbackLink.href = widgetUrl;
-    fallbackLink.target = "_blank";
-    fallbackLink.rel = "noopener noreferrer";
-    fallbackLink.textContent =
-      "Ticket checkout is loading";
+      const script =
+        document.createElement("script");
 
-    fallbackText.appendChild(fallbackLink);
-    fallback.appendChild(fallbackText);
-    container.appendChild(fallback);
+      script.src = TICKET_TAILOR_SCRIPT;
+      script.async = true;
 
-    const script = document.createElement("script");
+      script.setAttribute(
+        "data-url",
+        widgetUrl
+      );
 
-    script.src =
-      "https://cdn.tickettailor.com/js/widgets/min/widget.js" +
-      `?refresh=${Date.now()}`;
+      script.setAttribute(
+        "data-type",
+        "inline"
+      );
 
-    script.async = true;
+      script.setAttribute(
+        "data-inline-minimal",
+        "true"
+      );
 
-    script.setAttribute(
-      "data-url",
-      widgetUrl
-    );
+      script.setAttribute(
+        "data-inline-show-logo",
+        "false"
+      );
 
-    script.setAttribute(
-      "data-type",
-      "inline"
-    );
+      script.setAttribute(
+        "data-inline-bg-fill",
+        "false"
+      );
 
-    script.setAttribute(
-      "data-inline-minimal",
-      "true"
-    );
+      script.setAttribute(
+        "data-inline-inherit-ref-from-url-param",
+        ""
+      );
 
-    script.setAttribute(
-      "data-inline-show-logo",
-      "false"
-    );
+      script.setAttribute(
+        "data-inline-ref",
+        "website_widget"
+      );
 
-    script.setAttribute(
-      "data-inline-bg-fill",
-      "false"
-    );
-
-    script.setAttribute(
-      "data-inline-inherit-ref-from-url-param",
-      ""
-    );
-
-    script.setAttribute(
-      "data-inline-ref",
-      "website_widget"
-    );
-
-    container.appendChild(script);
+      container.appendChild(fallback);
+      container.appendChild(script);
+    }, 100);
 
     return () => {
-      container.innerHTML = "";
+      window.clearTimeout(timer);
     };
   }, [widgetUrl]);
 
@@ -123,7 +135,7 @@ export function TicketTailorWidget({
 
   return (
     <div
-      ref={widgetRef}
+      ref={containerRef}
       className="tt-widget min-h-[180px] w-full"
     />
   );
