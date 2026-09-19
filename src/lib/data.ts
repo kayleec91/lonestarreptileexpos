@@ -21,7 +21,10 @@ export interface Event {
   mapEmbed?: string;
   status?: "active" | "inactive";
   featured?: boolean;
-  faqs: Array<{ question: string; answer: string }>;
+  faqs: Array<{
+    question: string;
+    answer: string;
+  }>;
 }
 
 export interface Vendor {
@@ -48,6 +51,7 @@ export type VendorCategory =
 
 export function getDefaultFaqs(cityOrVenue = "") {
   const location = cityOrVenue.toLowerCase();
+
   const hasAtm =
     location.includes("north richland") ||
     location.includes("nrh") ||
@@ -57,12 +61,12 @@ export function getDefaultFaqs(cityOrVenue = "") {
     {
       question: "Is parking available?",
       answer:
-        "Yes, parking is available on-site or nearby. Check each venue for details.",
+        "Yes, parking is available on site or nearby. Check each venue for details.",
     },
     {
       question: "Are children allowed?",
       answer:
-        "Yes. Lone Star Reptile Expos are family-friendly events, and kids 6 and under are free.",
+        "Yes. Lone Star Reptile Expos are family friendly events, and kids 6 and under are free.",
     },
     {
       question: "Is there an ATM?",
@@ -84,13 +88,19 @@ export const events: Event[] = [
     name: "North Richland Hills Reptile Expo",
     city: "North Richland Hills",
     state: "TX",
+    locationId: "north-richland-hills",
     dates: "May 23–24, 2026",
     startDate: "2026-05-23",
     endDate: "2026-05-24",
     venue: "NYTEX Sports Centre",
-    address: "8851 Ice House Dr, North Richland Hills, TX 76180",
+    address:
+      "8851 Ice House Dr, North Richland Hills, TX 76180",
     hours: "Sat 10am–5pm · Sun 10am–4pm",
-    admission: { adult: 10, child: 5, under5: "Free" },
+    admission: {
+      adult: 10,
+      child: 5,
+      under5: "Free",
+    },
     ticketLink:
       "https://buytickets.at/lonestarreptileexpos/811232",
     vendorListLink:
@@ -106,13 +116,19 @@ export const events: Event[] = [
     name: "Arlington Reptile Expo",
     city: "Arlington",
     state: "TX",
+    locationId: "arlington",
     dates: "July 11–12, 2026",
     startDate: "2026-07-11",
     endDate: "2026-07-12",
     venue: "Knights of Columbus",
-    address: "2625 S Cooper St, Arlington, TX 76015",
+    address:
+      "2625 S Cooper St, Arlington, TX 76015",
     hours: "Sat 10am–5pm · Sun 10am–4pm",
-    admission: { adult: 10, child: 5, under5: "Free" },
+    admission: {
+      adult: 10,
+      child: 5,
+      under5: "Free",
+    },
     ticketLink:
       "https://www.tickettailor.com/events/lonestarreptileexpos/811240",
     vendorListLink:
@@ -127,13 +143,19 @@ export const events: Event[] = [
     name: "Coleman Reptile Expo",
     city: "Coleman",
     state: "TX",
+    locationId: "coleman",
     dates: "July 18–19, 2026",
     startDate: "2026-07-18",
     endDate: "2026-07-19",
     venue: "Bill Franklin Center",
-    address: "13152 State HWY 206, Coleman, TX 76834",
+    address:
+      "13152 State HWY 206, Coleman, TX 76834",
     hours: "Sat 10am–5pm · Sun 10am–4pm",
-    admission: { adult: 10, child: 5, under5: "Free" },
+    admission: {
+      adult: 10,
+      child: 5,
+      under5: "Free",
+    },
     ticketLink:
       "https://www.tickettailor.com/events/lonestarreptileexpos/1770510",
     vendorListLink:
@@ -148,13 +170,19 @@ export const events: Event[] = [
     name: "Amarillo Reptile Expo",
     city: "Amarillo",
     state: "TX",
+    locationId: "amarillo",
     dates: "October 17–18, 2026",
     startDate: "2026-10-17",
     endDate: "2026-10-18",
     venue: "Amarillo Civic Center Complex",
-    address: "401 S Buchanan St, Amarillo, TX 79101",
+    address:
+      "401 S Buchanan St, Amarillo, TX 79101",
     hours: "Sat 10am–5pm · Sun 10am–4pm",
-    admission: { adult: 10, child: 5, under5: "Free" },
+    admission: {
+      adult: 10,
+      child: 5,
+      under5: "Free",
+    },
     ticketLink:
       "https://www.tickettailor.com/events/lonestarreptileexpos/811243",
     vendorListLink:
@@ -169,13 +197,19 @@ export const events: Event[] = [
     name: "San Antonio Reptile Expo",
     city: "San Antonio",
     state: "TX",
+    locationId: "schertz",
     dates: "October 31–November 1, 2026",
     startDate: "2026-10-31",
     endDate: "2026-11-01",
     venue: "Schertz Civic Center",
-    address: "1400 Schertz Pkwy, Schertz, TX 78154",
+    address:
+      "1400 Schertz Pkwy, Schertz, TX 78154",
     hours: "Sat 10am–5pm · Sun 10am–4pm",
-    admission: { adult: 10, child: 5, under5: "Free" },
+    admission: {
+      adult: 10,
+      child: 5,
+      under5: "Free",
+    },
     ticketLink:
       "https://buytickets.at/lonestarreptileexpos/811248",
     vendorListLink:
@@ -190,13 +224,19 @@ export const events: Event[] = [
     name: "North Richland Hills Reptile Expo",
     city: "North Richland Hills",
     state: "TX",
+    locationId: "north-richland-hills",
     dates: "November 14–15, 2026",
     startDate: "2026-11-14",
     endDate: "2026-11-15",
     venue: "NYTEX Sports Centre",
-    address: "8851 Ice House Dr, North Richland Hills, TX 76180",
+    address:
+      "8851 Ice House Dr, North Richland Hills, TX 76180",
     hours: "Sat 10am–5pm · Sun 10am–4pm",
-    admission: { adult: 10, child: 5, under5: "Free" },
+    admission: {
+      adult: 10,
+      child: 5,
+      under5: "Free",
+    },
     ticketLink:
       "https://buytickets.at/lonestarreptileexpos/811232",
     vendorListLink:
@@ -213,7 +253,8 @@ export const vendors: Vendor[] = [
     id: "v1",
     name: "Texas Ball Pythons",
     category: "Breeder - Snakes",
-    description: "Premium ball python morphs bred in Texas",
+    description:
+      "Premium ball python morphs bred in Texas",
     eventIds: [
       "nrh-may-2026",
       "arlington-jul-2026",
@@ -224,7 +265,8 @@ export const vendors: Vendor[] = [
     id: "v2",
     name: "Lone Star Leos",
     category: "Breeder - Geckos",
-    description: "Leopard gecko specialists",
+    description:
+      "Leopard gecko specialists",
     eventIds: [
       "nrh-may-2026",
       "arlington-jul-2026",
@@ -234,14 +276,18 @@ export const vendors: Vendor[] = [
     id: "v3",
     name: "Panhandle Reptiles",
     category: "Breeder - Lizards",
-    description: "Bearded dragons and blue tongue skinks",
-    eventIds: ["amarillo-oct-2026"],
+    description:
+      "Bearded dragons and blue tongue skinks",
+    eventIds: [
+      "amarillo-oct-2026",
+    ],
   },
   {
     id: "v4",
     name: "West Texas Tortoises",
     category: "Breeder - Tortoises",
-    description: "Sulcata and Russian tortoises",
+    description:
+      "Sulcata and Russian tortoises",
     eventIds: [
       "coleman-jul-2026",
       "amarillo-oct-2026",
@@ -251,7 +297,8 @@ export const vendors: Vendor[] = [
     id: "v5",
     name: "Critter Supplies Co",
     category: "Supplies",
-    description: "Enclosures, lighting, and accessories",
+    description:
+      "Enclosures, lighting, and accessories",
     eventIds: [
       "nrh-may-2026",
       "arlington-jul-2026",
@@ -265,7 +312,8 @@ export const vendors: Vendor[] = [
     id: "v6",
     name: "Texas Feeders Direct",
     category: "Feeders",
-    description: "Crickets, roaches, and rodents",
+    description:
+      "Crickets, roaches, and rodents",
     eventIds: [
       "nrh-may-2026",
       "arlington-jul-2026",
@@ -294,39 +342,54 @@ export function isUpcomingEvent(
   event: Event,
   today = new Date()
 ) {
+  if (!event.endDate) {
+    return false;
+  }
+
   const endDate = new Date(
     `${event.endDate}T23:59:59`
   );
 
-  const isActive =
-    !event.status ||
-    event.status === "active";
+  if (Number.isNaN(endDate.getTime())) {
+    return false;
+  }
 
-  return isActive && endDate >= today;
+  return (
+    event.status !== "inactive" &&
+    endDate >= today
+  );
 }
 
 export const getUpcomingEvents = () =>
   events
-    .filter((event) => isUpcomingEvent(event))
+    .filter((event) =>
+      isUpcomingEvent(event)
+    )
     .sort(
       (a, b) =>
         new Date(a.startDate).getTime() -
         new Date(b.startDate).getTime()
     );
 
-export const getEventById = (id: string) =>
-  events.find((event) => event.id === id);
+export const getEventById = (
+  id: string
+) =>
+  events.find(
+    (event) => event.id === id
+  );
 
 export const getVendorsByEvent = (
   eventId: string
 ) =>
-  vendors.filter((vendor) =>
-    vendor.eventIds.includes(eventId)
+  vendors.filter(
+    (vendor) =>
+      vendor.eventIds.includes(eventId)
   );
 
 export const getVendorsByCategory = (
   category: VendorCategory
 ) =>
   vendors.filter(
-    (vendor) => vendor.category === category
+    (vendor) =>
+      vendor.category === category
   );
