@@ -1,51 +1,111 @@
 import { useEffect, useMemo, useRef } from "react";
 
-type TicketTailorWidgetProps = {
+interface TicketTailorWidgetProps {
   ticketLink: string;
-};
-
-const WIDGET_SCRIPT = "https://cdn.tickettailor.com/js/widgets/min/widget.js";
-
-function getTicketTailorUrl(ticketLink: string) {
-  const eventId = ticketLink.match(/\/(\d+)(?:[/?#]|$)/)?.[1];
-  if (!eventId) return "";
-
-  const params = new URLSearchParams({
-    ref: "website_widget",
-    show_search_filter: "true",
-    show_date_filter: "true",
-    show_sort: "true",
-    show_event_name: "false",
-    show_venue: "false",
-  });
-
-  return `https://www.tickettailor.com/events/lonestarreptileexpos/${eventId}/select-date?${params.toString()}`;
 }
 
-export function TicketTailorWidget({ ticketLink }: TicketTailorWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const widgetUrl = useMemo(() => getTicketTailorUrl(ticketLink), [ticketLink]);
+function createWidgetUrl(ticketLink: string) {
+  const eventId = ticketLink.match(
+    /\/(\d+)(?:[/?#]|$)/
+  )?.[1];
+
+  if (!eventId) {
+    return "";
+  }
+
+  return (
+    `https://www.tickettailor.com/events/` +
+    `lonestarreptileexpos/${eventId}/select-date` +
+    `?ref=website_widget` +
+    `&show_search_filter=true` +
+    `&show_date_filter=true` +
+    `&show_sort=true` +
+    `&show_event_name=false` +
+    `&show_venue=false`
+  );
+}
+
+export function TicketTailorWidget({
+  ticketLink,
+}: TicketTailorWidgetProps) {
+  const widgetRef = useRef<HTMLDivElement>(null);
+
+  const widgetUrl = useMemo(
+    () => createWidgetUrl(ticketLink),
+    [ticketLink]
+  );
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container || !widgetUrl) return;
+    const container = widgetRef.current;
+
+    if (!container || !widgetUrl) {
+      return;
+    }
 
     container.innerHTML = "";
 
     const fallback = document.createElement("div");
     fallback.className = "tt-widget-fallback";
-    fallback.innerHTML = `<p><a href="${widgetUrl}" target="_blank" rel="noopener noreferrer">Click here to buy tickets</a><br /><small><a href="https://www.tickettailor.com?rf=wdg_15979" class="tt-widget-powered">Sell tickets online with Ticket Tailor</a></small></p>`;
+
+    const fallbackText =
+      document.createElement("p");
+
+    const fallbackLink =
+      document.createElement("a");
+
+    fallbackLink.href = widgetUrl;
+    fallbackLink.target = "_blank";
+    fallbackLink.rel = "noopener noreferrer";
+    fallbackLink.textContent =
+      "Ticket checkout is loading";
+
+    fallbackText.appendChild(fallbackLink);
+    fallback.appendChild(fallbackText);
     container.appendChild(fallback);
 
     const script = document.createElement("script");
-    script.src = WIDGET_SCRIPT;
-    script.dataset.url = widgetUrl;
-    script.dataset.type = "inline";
-    script.dataset.inlineMinimal = "true";
-    script.dataset.inlineShowLogo = "false";
-    script.dataset.inlineBgFill = "false";
-    script.dataset.inlineInheritRefFromUrlParam = "";
-    script.dataset.inlineRef = "website_widget";
+
+    script.src =
+      "https://cdn.tickettailor.com/js/widgets/min/widget.js" +
+      `?refresh=${Date.now()}`;
+
+    script.async = true;
+
+    script.setAttribute(
+      "data-url",
+      widgetUrl
+    );
+
+    script.setAttribute(
+      "data-type",
+      "inline"
+    );
+
+    script.setAttribute(
+      "data-inline-minimal",
+      "true"
+    );
+
+    script.setAttribute(
+      "data-inline-show-logo",
+      "false"
+    );
+
+    script.setAttribute(
+      "data-inline-bg-fill",
+      "false"
+    );
+
+    script.setAttribute(
+      "data-inline-inherit-ref-from-url-param",
+      ""
+    );
+
+    script.setAttribute(
+      "data-inline-ref",
+      "website_widget"
+    );
+
     container.appendChild(script);
 
     return () => {
@@ -53,7 +113,18 @@ export function TicketTailorWidget({ ticketLink }: TicketTailorWidgetProps) {
     };
   }, [widgetUrl]);
 
-  if (!widgetUrl) return null;
+  if (!widgetUrl) {
+    return (
+      <div className="rounded-xl bg-muted p-6 text-center">
+        Ticket sales are not available for this event.
+      </div>
+    );
+  }
 
-  return <div ref={containerRef} className="tt-widget min-h-28" />;
+  return (
+    <div
+      ref={widgetRef}
+      className="tt-widget min-h-[180px] w-full"
+    />
+  );
 }
