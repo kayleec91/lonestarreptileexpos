@@ -39,7 +39,7 @@ function createWidgetUrl(ticketLink: string) {
 export function TicketTailorWidget({
   ticketLink,
 }: TicketTailorWidgetProps) {
-  const containerRef =
+  const widgetRef =
     useRef<HTMLDivElement>(null);
 
   const widgetUrl = useMemo(
@@ -48,80 +48,77 @@ export function TicketTailorWidget({
   );
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = widgetRef.current;
 
     if (!container || !widgetUrl) {
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      container.innerHTML = "";
+    container.innerHTML = "";
 
-      const fallback =
-        document.createElement("div");
+    const fallback =
+      document.createElement("div");
 
-      fallback.className =
-        "tt-widget-fallback";
+    fallback.className =
+      "tt-widget-fallback";
 
-      fallback.innerHTML = `
-        <p>
-          <a
-            href="${widgetUrl}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Click here if ticket checkout does not load
-          </a>
-        </p>
-      `;
+    fallback.innerHTML = `
+      <p>
+        <a
+          href="${widgetUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Click here if ticket checkout does not load
+        </a>
+      </p>
+    `;
 
-      const script =
-        document.createElement("script");
+    const script =
+      document.createElement("script");
 
-      script.src = TICKET_TAILOR_SCRIPT;
-      script.async = true;
+    script.src = TICKET_TAILOR_SCRIPT;
 
-      script.setAttribute(
-        "data-url",
-        widgetUrl
-      );
+    script.setAttribute(
+      "data-url",
+      widgetUrl
+    );
 
-      script.setAttribute(
-        "data-type",
-        "inline"
-      );
+    script.setAttribute(
+      "data-type",
+      "inline"
+    );
 
-      script.setAttribute(
-        "data-inline-minimal",
-        "true"
-      );
+    script.setAttribute(
+      "data-inline-minimal",
+      "true"
+    );
 
-      script.setAttribute(
-        "data-inline-show-logo",
-        "false"
-      );
+    script.setAttribute(
+      "data-inline-show-logo",
+      "false"
+    );
 
-      script.setAttribute(
-        "data-inline-bg-fill",
-        "false"
-      );
+    script.setAttribute(
+      "data-inline-bg-fill",
+      "false"
+    );
 
-      script.setAttribute(
-        "data-inline-inherit-ref-from-url-param",
-        ""
-      );
+    script.setAttribute(
+      "data-inline-inherit-ref-from-url-param",
+      ""
+    );
 
-      script.setAttribute(
-        "data-inline-ref",
-        "website_widget"
-      );
+    script.setAttribute(
+      "data-inline-ref",
+      "website_widget"
+    );
 
-      container.appendChild(fallback);
-      container.appendChild(script);
-    }, 100);
+    container.appendChild(fallback);
+    container.appendChild(script);
 
     return () => {
-      window.clearTimeout(timer);
+      container.innerHTML = "";
     };
   }, [widgetUrl]);
 
@@ -134,9 +131,11 @@ export function TicketTailorWidget({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="tt-widget min-h-[180px] w-full"
-    />
+    <div className="min-h-[180px] w-full">
+      <div
+        ref={widgetRef}
+        className="tt-widget"
+      />
+    </div>
   );
 }
