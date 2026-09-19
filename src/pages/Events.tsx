@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, ExternalLink, MapPin, Ticket } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -8,12 +8,26 @@ import { loadEvents } from "@/lib/googleSheets";
 export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState("all");
 
   useEffect(() => {
     loadEvents()
       .then(setEvents)
       .finally(() => setIsLoading(false));
   }, []);
+
+  const locations = useMemo(
+    () => Array.from(new Set(events.map((event) => event.city))).sort((a, b) => a.localeCompare(b)),
+    [events]
+  );
+
+  const filteredEvents = useMemo(
+    () =>
+      selectedLocation === "all"
+        ? events
+        : events.filter((event) => event.city === selectedLocation),
+    [events, selectedLocation]
+  );
 
   return (
     <Layout>
@@ -32,9 +46,35 @@ export default function Events() {
 
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
+          {!isLoading && events.length > 0 && (
+            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <label htmlFor="location-filter" className="block text-sm font-bold text-foreground">
+                  Filter by location
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  {filteredEvents.length} upcoming {filteredEvents.length === 1 ? "event" : "events"}
+                </p>
+              </div>
+              <select
+                id="location-filter"
+                value={selectedLocation}
+                onChange={(event) => setSelectedLocation(event.target.value)}
+                className="min-h-11 w-full rounded-lg border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-72"
+              >
+                <option value="all">All locations</option>
+                {locations.map((location) => (
+                  <option key={location} value={location}>
+                    {location}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {isLoading ? (
             <div className="text-center py-16 text-muted-foreground">Loading events...</div>
-          ) : events.length > 0 ? (
+          ) : filteredEvents.length > 0 ? (
             <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
               <div className="hidden lg:grid grid-cols-[1.1fr_1.25fr_1.2fr_auto] items-center gap-6 bg-primary px-6 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground/75">
                 <span>Date</span>
@@ -42,7 +82,7 @@ export default function Events() {
                 <span>Location</span>
                 <span className="min-w-[225px]">Links</span>
               </div>
-              {events.map((event, index) => (
+              {filteredEvents.map((event, index) => (
                 <div
                   key={`${event.id}-${event.startDate}`}
                   className="animate-fade-up grid gap-4 border-t border-border px-5 py-5 first:border-t-0 lg:grid-cols-[1.1fr_1.25fr_1.2fr_auto] lg:items-center lg:gap-6 lg:px-6 lg:py-4"
@@ -79,15 +119,13 @@ export default function Events() {
                       <ExternalLink className="h-4 w-4" />
                     </Link>
                     {event.ticketLink && (
-                      <a
-                        href={event.ticketLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        to={`/events/${encodeURIComponent(event.id)}#tickets`}
                         className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-terracotta px-3.5 text-sm font-semibold text-cream transition-opacity hover:opacity-90"
                       >
                         Tickets
                         <Ticket className="h-4 w-4" />
-                      </a>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -96,8 +134,14 @@ export default function Events() {
           ) : (
             <div className="bg-card rounded-2xl p-10 text-center shadow-card">
               <Calendar className="w-14 h-14 mx-auto text-primary mb-4" />
-              <h2 className="text-2xl font-bold text-foreground mb-2">No upcoming events listed yet</h2>
-              <p className="text-muted-foreground">New show dates will appear here once they are added to the website sheet.</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                {events.length > 0 ? "No events at this location" : "No upcoming events listed yet"}
+              </h2>
+              <p className="text-muted-foreground">
+                {events.length > 0
+                  ? "Choose All locations or select another location."
+                  : "New show dates will appear here once they are added to the website sheet."}
+              </p>
             </div>
           )}
         </div>
