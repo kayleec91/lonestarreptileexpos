@@ -1,12 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { Calendar, MapPin, Clock, DollarSign, Ticket, ChevronLeft, Search, Store, ExternalLink } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { VendorCard } from "@/components/VendorCard";
-import { TicketTailorWidget } from "@/components/TicketTailorWidget";
 import { Event, Vendor } from "@/lib/data";
 import { loadEvents, loadVendors } from "@/lib/googleSheets";
 
@@ -15,23 +14,35 @@ export default function EventDetail() {
   const [events, setEvents] = useState<Event[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isVendorsLoading, setIsVendorsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [eventId]);
 
   useEffect(() => {
     if (!eventId) return;
 
+    setIsLoading(true);
+    setIsVendorsLoading(true);
+    setVendors([]);
+
     loadEvents()
-      .then(async (loadedEvents) => {
+      .then((loadedEvents) => {
         setEvents(loadedEvents);
         const selectedEvent = loadedEvents.find((item) => item.id === eventId);
+        setIsLoading(false);
+
         if (!selectedEvent) {
           setVendors([]);
+          setIsVendorsLoading(false);
           return;
         }
 
-        const vendorLocationId = selectedEvent.locationId || selectedEvent.city;
-        const loadedVendors = await loadVendors(vendorLocationId);
-        setVendors(loadedVendors);
+        loadVendors(selectedEvent.id)
+          .then(setVendors)
+          .finally(() => setIsVendorsLoading(false));
       })
       .finally(() => setIsLoading(false));
   }, [eventId]);
@@ -129,24 +140,18 @@ export default function EventDetail() {
               {event.ticketLink && (
                 <div id="tickets" className="bg-card rounded-2xl p-5 sm:p-7 shadow-card scroll-mt-28">
                   <div className="mb-5">
-                    <h2 className="text-2xl font-bold text-foreground">Select Tickets</h2>
-                    <p className="text-muted-foreground mt-1">Choose your event date and tickets below. Secure checkout is provided by Ticket Tailor.</p>
+                    <h2 className="text-2xl font-bold text-foreground">Buy Tickets</h2>
+                    <p className="text-muted-foreground mt-1">Purchase tickets for this upcoming reptile expo.</p>
                   </div>
-                  <TicketTailorWidget ticketLink={event.ticketLink} />
+                  <Button variant="ticket" size="lg" asChild>
+                    <a href={event.ticketLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                      <Ticket className="w-5 h-5" />
+                      Buy Tickets
+                    </a>
+                  </Button>
                 </div>
               )}
 
-              <div>
-                <h2 className="text-2xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
-                <Accordion type="single" collapsible className="space-y-3">
-                  {event.faqs.map((faq, index) => (
-                    <AccordionItem key={index} value={`faq-${index}`} className="bg-card rounded-xl px-6 shadow-card border-none">
-                      <AccordionTrigger className="text-left font-semibold hover:no-underline">{faq.question}</AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
             </div>
 
             <div className="lg:col-span-1">
@@ -186,6 +191,20 @@ export default function EventDetail() {
         </div>
       </section>
 
+      <section className="pb-16 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
+          <Accordion type="single" collapsible className="space-y-3">
+            {event.faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`faq-${index}`} className="bg-card rounded-xl px-6 shadow-card border-none">
+                <AccordionTrigger className="text-left font-semibold hover:no-underline">{faq.question}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
       <section id="vendors" className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -196,7 +215,9 @@ export default function EventDetail() {
             </div>
           </div>
 
-          {filteredVendors.length > 0 ? (
+          {isVendorsLoading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading vendors...</div>
+          ) : filteredVendors.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredVendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
             </div>
@@ -224,3 +245,4 @@ function InfoCard({ icon: Icon, title, text }: { icon: typeof Calendar; title: s
     </div>
   );
 }
+
