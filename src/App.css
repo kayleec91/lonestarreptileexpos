@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Events from "./pages/Events";
@@ -17,10 +17,21 @@ const queryClient = new QueryClient();
 function ScrollToPagePosition() {
   const { pathname, search, hash } = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
     if (!hash) {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      return;
+      const scrollToTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      scrollToTop();
+      const frame = window.requestAnimationFrame(scrollToTop);
+      const timers = [0, 100, 300].map((delay) => window.setTimeout(scrollToTop, delay));
+
+      return () => {
+        window.cancelAnimationFrame(frame);
+        timers.forEach((timer) => window.clearTimeout(timer));
+        window.history.scrollRestoration = previousScrollRestoration;
+      };
     }
 
     let attempts = 0;
@@ -39,6 +50,10 @@ function ScrollToPagePosition() {
     };
 
     scrollToTarget();
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
   }, [pathname, search, hash]);
 
   return null;
@@ -67,3 +82,4 @@ const App = () => (
 );
 
 export default App;
+
