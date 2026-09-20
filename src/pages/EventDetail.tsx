@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { VendorCard } from "@/components/VendorCard";
-import { TicketTailorWidget } from "@/components/TicketTailorWidget";
 import { Event, Vendor } from "@/lib/data";
 import { loadEvents, loadVendors } from "@/lib/googleSheets";
 
@@ -142,10 +141,15 @@ export default function EventDetail() {
               {event.ticketLink && (
                 <div id="tickets" className="bg-card rounded-2xl p-5 sm:p-7 shadow-card scroll-mt-28">
                   <div className="mb-5">
-                    <h2 className="text-2xl font-bold text-foreground">Select Tickets</h2>
-                    <p className="text-muted-foreground mt-1">Choose your event date and tickets below. Secure checkout is provided by Ticket Tailor.</p>
+                    <h2 className="text-2xl font-bold text-foreground">Buy Tickets</h2>
+                    <p className="text-muted-foreground mt-1">Purchase tickets for this upcoming reptile expo.</p>
                   </div>
-                  <TicketTailorWidget ticketLink={event.ticketLink} />
+                  <Button variant="ticket" size="lg" asChild>
+                    <a href={event.ticketLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                      <Ticket className="w-5 h-5" />
+                      Buy Tickets
+                    </a>
+                  </Button>
                 </div>
               )}
 
