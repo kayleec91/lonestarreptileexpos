@@ -1,6 +1,8 @@
 import { events as fallbackEvents, vendors as fallbackVendors, Event, Vendor, VendorCategory, isUpcomingEvent, getDefaultFaqs } from "@/lib/data";
 
 const GOOGLE_SCRIPT_URL = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL?.trim() || "";
+let eventsCache: Event[] | null = null;
+let eventsRequest: Promise<Event[]> | null = null;
 
 export interface VendorApplication {
   businessName: string;
@@ -84,78 +86,54 @@ function normalizeUrl(url: string) {
 }
 
 async function getJson(action: string, params: Record<string, string> = {}) {
-  if (!GOOGLE_SCRIPT_URL) {
-    console.error("Missing VITE_GOOGLE_APPS_SCRIPT_URL");
-    return null;
-  }
+  if (!GOOGLE_SCRIPT_URL) return null;
 
   const url = new URL(GOOGLE_SCRIPT_URL);
   url.searchParams.set("action", action);
   url.searchParams.set("t", String(Date.now()));
-
-  Object.entries(params).forEach(([key, value]) => {
-    url.searchParams.set(key, value);
-  });
+  Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
 
   const response = await fetch(url.toString());
-
-  if (!response.ok) {
-    throw new Error(`Google Sheets request failed: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`Google Sheets request failed: ${response.status}`);
   return response.json();
 }
 
 export async function loadEvents(): Promise<Event[]> {
-  const data = await getJson("events");
+  if (eventsCache) return eventsCache;
+  if (eventsRequest) return eventsRequest;
 
-  const rawEvents = Array.isArray(data)
-    ? data
-    : data?.events;
+  eventsRequest = (async () => {
+    try {
+      const data = await getJson("events");
+      const rawEvents = Array.isArray(data) ? data : data?.events;
+      if (!Array.isArray(rawEvents)) return getFallbackEvents();
 
-  if (!Array.isArray(rawEvents)) {
-    console.error("Events response was not an array:", data);
-    return [];
-  }
+      const sheetEvents = rawEvents
+        .map((event) => normalizeEvent(event))
+        .filter((event) => event.id && event.name && event.city && event.startDate && event.endDate)
+        .filter((event) => isUpcomingEvent(event))
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
-  const sheetEvents = rawEvents
-    .map((event) => normalizeEvent(event))
-    .filter(
-      (event) =>
-        event.id &&
-        event.name &&
-        event.city &&
-        event.startDate &&
-        event.endDate
-    )
-    .filter((event) => isUpcomingEvent(event))
-    .sort(
-      (a, b) =>
-        new Date(a.startDate).getTime() -
-        new Date(b.startDate).getTime()
-    );
+      return sheetEvents.length ? sheetEvents : getFallbackEvents();
+    } catch (error) {
+      console.warn("Using fallback events because Google Sheets failed:", error);
+      return getFallbackEvents();
+    }
+  })();
 
-  console.log("Loaded events from Google Sheets:", sheetEvents);
-
-  return sheetEvents;
+  eventsCache = await eventsRequest;
+  eventsRequest = null;
+  return eventsCache;
 }
 
 export async function loadVendors(eventId?: string): Promise<Vendor[]> {
   try {
     const data = await getJson("vendors", eventId ? { eventId } : {});
     const rawVendors = Array.isArray(data) ? data : data?.vendors;
+    if (!Array.isArray(rawVendors)) return getFallbackVendors(eventId);
 
-    if (!Array.isArray(rawVendors)) {
-      return getFallbackVendors(eventId);
-    }
-
-    const sheetVendors = rawVendors
-      .map((vendor) => normalizeVendor(vendor))
-      .filter((vendor) => vendor.id && vendor.name);
-
-    return eventId
-      ? sheetVendors.filter((vendor) => vendor.eventIds.includes(eventId))
-      : sheetVendors;
+    const sheetVendors = rawVendors.map((vendor) => normalizeVendor(vendor)).filter((vendor) => vendor.id && vendor.name);
+    return eventId ? sheetVendors.filter((vendor) => vendor.eventIds.includes(eventId)) : sheetVendors;
   } catch (error) {
     console.warn("Using fallback vendors because Google Sheets failed:", error);
     return getFallbackVendors(eventId);
@@ -183,40 +161,24 @@ export async function submitVendorApplication(application: VendorApplication) {
 export function getFallbackEvents() {
   return fallbackEvents
     .filter((event) => isUpcomingEvent(event))
-    .sort(
-      (a, b) =>
-        new Date(a.startDate).getTime() -
-        new Date(b.startDate).getTime()
-    );
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 }
 
 export function getFallbackVendors(eventId?: string) {
-  return eventId
-    ? fallbackVendors.filter((vendor) => vendor.eventIds.includes(eventId))
-    : fallbackVendors;
+  return eventId ? fallbackVendors.filter((vendor) => vendor.eventIds.includes(eventId)) : fallbackVendors;
 }
 
 function createEventId(city: string, startDate: string) {
-  const citySlug =
-    city
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "") || "event";
-
-  return startDate
-    ? `${citySlug}-${startDate}`
-    : citySlug;
+  const citySlug = city.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "event";
+  return startDate ? `${citySlug}-${startDate}` : citySlug;
 }
 
 function ordinal(day: number) {
   if (day >= 11 && day <= 13) return `${day}th`;
-
   const last = day % 10;
-
   if (last === 1) return `${day}st`;
   if (last === 2) return `${day}nd`;
   if (last === 3) return `${day}rd`;
-
   return `${day}th`;
 }
 
@@ -232,20 +194,14 @@ export function formatDisplayDate(startDate: string, endDate: string) {
   const endDay = ordinal(end.getDate());
   const year = end.getFullYear();
 
-  if (
-    start.getFullYear() === end.getFullYear() &&
-    start.getMonth() === end.getMonth() &&
-    start.getDate() === end.getDate()
-  ) {
+  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth() && start.getDate() === end.getDate()) {
     return `${startMonth} ${startDay}, ${year}`;
   }
 
-  if (
-    start.getFullYear() === end.getFullYear() &&
-    start.getMonth() === end.getMonth()
-  ) {
+  if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) {
     return `${startMonth} ${startDay} & ${endDay}, ${year}`;
   }
 
   return `${startMonth} ${startDay} & ${endMonth} ${endDay}, ${year}`;
 }
+
