@@ -1,8 +1,15 @@
-import { events as fallbackEvents, vendors as fallbackVendors, Event, Vendor, VendorCategory, isUpcomingEvent, getDefaultFaqs } from "@/lib/data";
+import { events as fallbackEvents, vendors as fallbackVendors, Event, Vendor, VendorCategory, getDefaultFaqs } from "@/lib/data";
 
 const GOOGLE_SCRIPT_URL = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL?.trim() || "";
 let eventsCache: Event[] | null = null;
 let eventsRequest: Promise<Event[]> | null = null;
+
+function isUpcomingEvent(event: Event, today = new Date()) {
+  const endDate = new Date(`${event.endDate}T23:59:59`);
+  const isActive = !event.status || event.status === "active";
+
+  return isActive && endDate >= today;
+}
 
 export interface VendorApplication {
   businessName: string;
