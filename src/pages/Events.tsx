@@ -113,6 +113,7 @@ export default function Events() {
                   <div className="flex flex-wrap gap-2 lg:min-w-[225px] lg:justify-end">
                     <Link
                       to={`/events/${encodeURIComponent(event.id)}`}
+                      onClick={() => window.scrollTo({ top: 0, left: 0, behavior: "auto" })}
                       className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-primary px-3.5 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                     >
                       Event Page
@@ -149,3 +150,4 @@ export default function Events() {
     </Layout>
   );
 }
+
