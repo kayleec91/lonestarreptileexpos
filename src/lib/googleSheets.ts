@@ -81,7 +81,7 @@ function normalizeVendor(row: Record<string, unknown>): Vendor {
     category: (asString(row.category) || "Other") as VendorCategory,
     description: asString(row.description) || asString(row.animalsProducts),
     eventIds,
-    website: normalizeUrl(asString(row.website)),
+    website: normalizeUrl(asString(row.website) || asString(row.link)),
     instagram: normalizeUrl(asString(row.instagram)),
   };
 }
@@ -139,8 +139,12 @@ export async function loadVendors(eventId?: string): Promise<Vendor[]> {
     const rawVendors = Array.isArray(data) ? data : data?.vendors;
     if (!Array.isArray(rawVendors)) return getFallbackVendors(eventId);
 
-    const sheetVendors = rawVendors.map((vendor) => normalizeVendor(vendor)).filter((vendor) => vendor.id && vendor.name);
-    return eventId ? sheetVendors.filter((vendor) => vendor.eventIds.includes(eventId)) : sheetVendors;
+    // The Apps Script already selects the vendor tab for this event.
+    // Its response contains the vendors for that event only, so filtering
+    // again by eventIds would incorrectly remove every vendor.
+    return rawVendors
+      .map((vendor) => normalizeVendor(vendor))
+      .filter((vendor) => vendor.id && vendor.name);
   } catch (error) {
     console.warn("Using fallback vendors because Google Sheets failed:", error);
     return getFallbackVendors(eventId);
@@ -211,4 +215,3 @@ export function formatDisplayDate(startDate: string, endDate: string) {
 
   return `${startMonth} ${startDay} & ${endMonth} ${endDay}, ${year}`;
 }
-
