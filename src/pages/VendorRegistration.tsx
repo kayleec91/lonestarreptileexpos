@@ -20,6 +20,7 @@ const tablePricingByLocation: Record<string, Array<{ label: string; value: strin
     { label: "6 8ft tables - $425", value: "Arlington - 6 8ft tables - $425" },
     { label: "7 8ft tables - $475", value: "Arlington - 7 8ft tables - $475" },
     { label: "8 8ft tables - $525", value: "Arlington - 8 8ft tables - $525" },
+    { label: "Other / Contact us for pricing", value: "Arlington - Other / Contact us for pricing" },
   ],
   amarillo: [
     { label: "1 8ft table - $125", value: "Amarillo - 1 8ft table - $125" },
@@ -30,6 +31,7 @@ const tablePricingByLocation: Record<string, Array<{ label: string; value: strin
     { label: "6 8ft tables - $425", value: "Amarillo - 6 8ft tables - $425" },
     { label: "7 8ft tables - $475", value: "Amarillo - 7 8ft tables - $475" },
     { label: "8 8ft tables - $525", value: "Amarillo - 8 8ft tables - $525" },
+    { label: "Other / Contact us for pricing", value: "Amarillo - Other / Contact us for pricing" },
   ],
   schertz: [
     { label: "1 6ft table - $115", value: "Schertz - 1 6ft table - $115" },
@@ -40,6 +42,7 @@ const tablePricingByLocation: Record<string, Array<{ label: string; value: strin
     { label: "6 6ft tables - $415", value: "Schertz - 6 6ft tables - $415" },
     { label: "7 6ft tables - $465", value: "Schertz - 7 6ft tables - $465" },
     { label: "8 6ft tables - $515", value: "Schertz - 8 6ft tables - $515" },
+    { label: "Other / Contact us for pricing", value: "Schertz - Other / Contact us for pricing" },
   ],
   "north richland hills": [
     { label: "1 8ft table - $150", value: "North Richland Hills - 1 8ft table - $150" },
@@ -50,11 +53,12 @@ const tablePricingByLocation: Record<string, Array<{ label: string; value: strin
     { label: "6 8ft tables - $475", value: "North Richland Hills - 6 8ft tables - $475" },
     { label: "7 8ft tables - $525", value: "North Richland Hills - 7 8ft tables - $525" },
     { label: "8 8ft tables - $575", value: "North Richland Hills - 8 8ft tables - $575" },
+    { label: "Other / Contact us for pricing", value: "North Richland Hills - Other / Contact us for pricing" },
   ],
 };
 
 const defaultTableOptions = [
-  { label: "Contact us for booth pricing", value: "Contact us for booth pricing" },
+  { label: "Other / Contact us for pricing", value: "Other / Contact us for pricing" },
 ];
 
 const initialForm: VendorApplication = {
@@ -118,7 +122,7 @@ export default function VendorRegistration() {
 
   const tableOptions = useMemo(() => {
     const key = getPricingKey(selectedEvent);
-    return key ? tablePricingByLocation[key] || defaultTableOptions : [];
+    return key ? tablePricingByLocation[key] || defaultTableOptions : defaultTableOptions;
   }, [selectedEvent]);
 
   function updateField(field: keyof VendorApplication, value: string) {
