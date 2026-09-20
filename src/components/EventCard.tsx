@@ -12,6 +12,7 @@ interface EventCardProps {
 
 export function EventCard({ event, featured = false }: EventCardProps) {
   const eventPage = `/events/${encodeURIComponent(event.id)}`;
+  const openAtTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
   return (
     <div
@@ -59,7 +60,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
             </Link>
           </Button>
           <Button variant="outline" className="w-full" asChild>
-            <Link to={eventPage}>
+            <Link to={eventPage} onClick={openAtTop}>
               <Info className="w-4 h-4" />
               Event Details
             </Link>
@@ -69,3 +70,4 @@ export function EventCard({ event, featured = false }: EventCardProps) {
     </div>
   );
 }
+
