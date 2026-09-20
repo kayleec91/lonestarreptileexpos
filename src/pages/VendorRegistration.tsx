@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Store, CheckCircle, Send, Loader2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -12,48 +12,70 @@ import { loadEvents, submitVendorApplication, VendorApplication } from "@/lib/go
 
 const tablePricingByLocation: Record<string, Array<{ label: string; value: string }>> = {
   arlington: [
-    { label: "1 8ft table - $125", value: "Arlington - 1 8ft table - $125" },
-    { label: "2 8ft tables - $225", value: "Arlington - 2 8ft tables - $225" },
-    { label: "3 8ft tables - $275", value: "Arlington - 3 8ft tables - $275" },
-    { label: "4 8ft tables - $325", value: "Arlington - 4 8ft tables - $325" },
-    { label: "5 8ft tables - $375", value: "Arlington - 5 8ft tables - $375" },
-    { label: "6 8ft tables - $425", value: "Arlington - 6 8ft tables - $425" },
-    { label: "7 8ft tables - $475", value: "Arlington - 7 8ft tables - $475" },
-    { label: "8 8ft tables - $525", value: "Arlington - 8 8ft tables - $525" },
+    { label: "1 8ft table - $135", value: "Arlington - 1 8ft table - $135" },
+    { label: "2 8ft tables - $245", value: "Arlington - 2 8ft tables - $245" },
+    { label: "3 8ft tables - $330", value: "Arlington - 3 8ft tables - $330" },
+    { label: "4 8ft tables - $415", value: "Arlington - 4 8ft tables - $415" },
+    { label: "5 8ft tables - $500", value: "Arlington - 5 8ft tables - $500" },
+    { label: "6 8ft tables - $585", value: "Arlington - 6 8ft tables - $585" },
+    { label: "7 8ft tables - $670", value: "Arlington - 7 8ft tables - $670" },
+    { label: "8 8ft tables - $755", value: "Arlington - 8 8ft tables - $755" },
     { label: "Other / Contact us for pricing", value: "Arlington - Other / Contact us for pricing" },
   ],
   amarillo: [
     { label: "1 8ft table - $125", value: "Amarillo - 1 8ft table - $125" },
     { label: "2 8ft tables - $225", value: "Amarillo - 2 8ft tables - $225" },
-    { label: "3 8ft tables - $275", value: "Amarillo - 3 8ft tables - $275" },
-    { label: "4 8ft tables - $325", value: "Amarillo - 4 8ft tables - $325" },
-    { label: "5 8ft tables - $375", value: "Amarillo - 5 8ft tables - $375" },
-    { label: "6 8ft tables - $425", value: "Amarillo - 6 8ft tables - $425" },
-    { label: "7 8ft tables - $475", value: "Amarillo - 7 8ft tables - $475" },
-    { label: "8 8ft tables - $525", value: "Amarillo - 8 8ft tables - $525" },
+    { label: "3 8ft tables - $300", value: "Amarillo - 3 8ft tables - $300" },
+    { label: "4 8ft tables - $350", value: "Amarillo - 4 8ft tables - $350" },
+    { label: "5 8ft tables - $400", value: "Amarillo - 5 8ft tables - $400" },
+    { label: "6 8ft tables - $450", value: "Amarillo - 6 8ft tables - $450" },
+    { label: "7 8ft tables - $500", value: "Amarillo - 7 8ft tables - $500" },
+    { label: "8 8ft tables - $550", value: "Amarillo - 8 8ft tables - $550" },
     { label: "Other / Contact us for pricing", value: "Amarillo - Other / Contact us for pricing" },
   ],
   schertz: [
-    { label: "1 6ft table - $115", value: "Schertz - 1 6ft table - $115" },
-    { label: "2 6ft tables - $215", value: "Schertz - 2 6ft tables - $215" },
-    { label: "3 6ft tables - $265", value: "Schertz - 3 6ft tables - $265" },
-    { label: "4 6ft tables - $315", value: "Schertz - 4 6ft tables - $315" },
-    { label: "5 6ft tables - $365", value: "Schertz - 5 6ft tables - $365" },
-    { label: "6 6ft tables - $415", value: "Schertz - 6 6ft tables - $415" },
-    { label: "7 6ft tables - $465", value: "Schertz - 7 6ft tables - $465" },
-    { label: "8 6ft tables - $515", value: "Schertz - 8 6ft tables - $515" },
+    { label: "1 6ft table - $125", value: "Schertz - 1 6ft table - $125" },
+    { label: "2 6ft tables - $225", value: "Schertz - 2 6ft tables - $225" },
+    { label: "3 6ft tables - $300", value: "Schertz - 3 6ft tables - $300" },
+    { label: "4 6ft tables - $350", value: "Schertz - 4 6ft tables - $350" },
+    { label: "5 6ft tables - $400", value: "Schertz - 5 6ft tables - $400" },
+    { label: "6 6ft tables - $450", value: "Schertz - 6 6ft tables - $450" },
+    { label: "7 6ft tables - $500", value: "Schertz - 7 6ft tables - $500" },
+    { label: "8 6ft tables - $550", value: "Schertz - 8 6ft tables - $550" },
     { label: "Other / Contact us for pricing", value: "Schertz - Other / Contact us for pricing" },
   ],
   "north richland hills": [
     { label: "1 8ft table - $150", value: "North Richland Hills - 1 8ft table - $150" },
-    { label: "2 8ft tables - $250", value: "North Richland Hills - 2 8ft tables - $250" },
-    { label: "3 8ft tables - $325", value: "North Richland Hills - 3 8ft tables - $325" },
-    { label: "4 8ft tables - $375", value: "North Richland Hills - 4 8ft tables - $375" },
-    { label: "5 8ft tables - $425", value: "North Richland Hills - 5 8ft tables - $425" },
-    { label: "6 8ft tables - $475", value: "North Richland Hills - 6 8ft tables - $475" },
-    { label: "7 8ft tables - $525", value: "North Richland Hills - 7 8ft tables - $525" },
-    { label: "8 8ft tables - $575", value: "North Richland Hills - 8 8ft tables - $575" },
+    { label: "2 8ft tables - $275", value: "North Richland Hills - 2 8ft tables - $275" },
+    { label: "3 8ft tables - $375", value: "North Richland Hills - 3 8ft tables - $375" },
+    { label: "4 8ft tables - $475", value: "North Richland Hills - 4 8ft tables - $475" },
+    { label: "5 8ft tables - $575", value: "North Richland Hills - 5 8ft tables - $575" },
+    { label: "6 8ft tables - $675", value: "North Richland Hills - 6 8ft tables - $675" },
+    { label: "7 8ft tables - $775", value: "North Richland Hills - 7 8ft tables - $775" },
+    { label: "8 8ft tables - $875", value: "North Richland Hills - 8 8ft tables - $875" },
     { label: "Other / Contact us for pricing", value: "North Richland Hills - Other / Contact us for pricing" },
+  ],
+  lewisville: [
+    { label: "1 table - $150", value: "Lewisville - 1 table - $150" },
+    { label: "2 tables - $275", value: "Lewisville - 2 tables - $275" },
+    { label: "3 tables - $375", value: "Lewisville - 3 tables - $375" },
+    { label: "4 tables - $475", value: "Lewisville - 4 tables - $475" },
+    { label: "5 tables - $575", value: "Lewisville - 5 tables - $575" },
+    { label: "6 tables - $675", value: "Lewisville - 6 tables - $675" },
+    { label: "7 tables - $775", value: "Lewisville - 7 tables - $775" },
+    { label: "8 tables - $875", value: "Lewisville - 8 tables - $875" },
+    { label: "Other / Contact us for pricing", value: "Lewisville - Other / Contact us for pricing" },
+  ],
+  "san angelo": [
+    { label: "1 table - $125", value: "San Angelo - 1 table - $125" },
+    { label: "2 tables - $225", value: "San Angelo - 2 tables - $225" },
+    { label: "3 tables - $300", value: "San Angelo - 3 tables - $300" },
+    { label: "4 tables - $350", value: "San Angelo - 4 tables - $350" },
+    { label: "5 tables - $400", value: "San Angelo - 5 tables - $400" },
+    { label: "6 tables - $450", value: "San Angelo - 6 tables - $450" },
+    { label: "7 tables - $500", value: "San Angelo - 7 tables - $500" },
+    { label: "8 tables - $550", value: "San Angelo - 8 tables - $550" },
+    { label: "Other / Contact us for pricing", value: "San Angelo - Other / Contact us for pricing" },
   ],
 };
 
@@ -83,6 +105,8 @@ function getPricingKey(event?: Event) {
 
   if (city.includes("arlington")) return "arlington";
   if (city.includes("amarillo")) return "amarillo";
+  if (city.includes("lewisville")) return "lewisville";
+  if (city.includes("san angelo")) return "san angelo";
   if (city.includes("north richland") || city.includes("nrh")) return "north richland hills";
   if (city.includes("schertz") || venue.includes("schertz") || city.includes("san antonio")) return "schertz";
 
@@ -98,6 +122,18 @@ export default function VendorRegistration() {
   const [submitted, setSubmitted] = useState(false);
 
   const selectedEventFromUrl = searchParams.get("event") || "";
+
+  useLayoutEffect(() => {
+    const scrollToTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    scrollToTop();
+    const frame = window.requestAnimationFrame(scrollToTop);
+    const timer = window.setTimeout(scrollToTop, 150);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [selectedEventFromUrl]);
 
   useEffect(() => {
     loadEvents().then((loadedEvents) => {
@@ -303,3 +339,4 @@ function Field({ label, required = false, children }: { label: string; required?
     </div>
   );
 }
+
